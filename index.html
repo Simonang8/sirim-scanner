@@ -83,8 +83,16 @@
                     <h3 class="font-bold text-slate-800 text-sm mb-4">对准纸箱下方标准条形码</h3>
                     <div class="flex gap-4 w-full justify-center">
                         <button onclick="startScanning()" class="w-24 h-24 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-2xl flex flex-col items-center justify-center shadow-lg active:scale-95 transition-all"><i data-lucide="scan" class="w-7 h-7 mb-1.5 animate-pulse"></i><span class="text-[11px] font-bold">实时相机</span></button>
-                        <button onclick="triggerFileScan()" class="w-24 h-24 bg-slate-50 border border-slate-200 text-slate-600 rounded-2xl flex flex-col items-center justify-center active:scale-95 transition-all"><i data-lucide="image" class="w-7 h-7 text-slate-400 mb-1.5"></i><span class="text-[11px] font-bold text-slate-700">上传照片</span></button>
-                        <input type="file" id="file-scanner" accept="image/*" capture="environment" class="hidden" onchange="scanFromFile(event)">
+                        
+                        <!-- 这里的 input 移除了 capture="environment"，让它回归上传照片的本质 -->
+                        <button onclick="triggerFileScan()" class="w-24 h-24 bg-slate-50 border border-slate-200 text-slate-600 rounded-2xl flex flex-col items-center justify-center active:scale-95 transition-all relative overflow-hidden">
+                            <i data-lucide="image" class="w-7 h-7 text-slate-400 mb-1.5"></i>
+                            <span class="text-[11px] font-bold text-slate-700">上传照片</span>
+                            <div id="file-loading-overlay" class="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center hidden">
+                                <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-blue-500"></i>
+                            </div>
+                        </button>
+                        <input type="file" id="file-scanner" accept="image/*" class="hidden" onchange="scanFromFile(event)">
                     </div>
                     <div class="w-full mt-5 flex items-center gap-2">
                         <div class="relative flex-1">
@@ -181,7 +189,7 @@
                 <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">
                     <div class="flex justify-between items-center border-b pb-2"><h3 class="font-bold text-sm text-slate-800">登记新机油 (维护字典)</h3></div>
                     <div class="space-y-3 text-xs">
-                        <div><label class="block font-bold text-slate-600 mb-1">Barcode (条形码号码)</label><input type="text" id="new-barcode" placeholder="例如: 8809680716964" class="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl font-semibold"></div>
+                        <div><label class="block font-bold text-slate-600 mb-1">Barcode (条形码号码)</label><input type="text" id="new-barcode" placeholder="例如: 8809680716964 (系统默认作为批次号)" class="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl font-semibold"></div>
                         <div class="grid grid-cols-2 gap-2">
                             <div><label class="block font-bold text-slate-600 mb-1">Brand</label><input type="text" id="new-brand" value="S-OIL" class="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold"></div>
                             <div><label class="block font-bold text-slate-600 mb-1">Rating</label><input type="text" id="new-rating" placeholder="例如: SAE 5W-30" class="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold"></div>
@@ -201,7 +209,6 @@
                     </div>
                 </div>
 
-                <!-- 本地数据库展示区 (新增了备份同步入口) -->
                 <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
                     <div class="flex justify-between items-center">
                         <h3 class="font-bold text-sm text-slate-800">本地已登记条码库</h3>
@@ -249,7 +256,6 @@
         </div>
     </div>
 
-    <!-- 新增：字典同步专属管理面板 (Sync Modal) -->
     <div id="sync-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center px-4 hidden">
         <div class="bg-white rounded-[2rem] max-w-sm w-full p-6 shadow-2xl space-y-4 flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center pb-2 border-b">
@@ -261,7 +267,6 @@
             </div>
             
             <div class="space-y-4 pt-1 text-xs overflow-y-auto no-scrollbar">
-                
                 <div class="space-y-2">
                     <label class="block text-[11px] font-bold text-slate-500">方式一：导出/导入为本地文件</label>
                     <div class="grid grid-cols-2 gap-2">
@@ -412,9 +417,31 @@
         function stopScanning() { if(html5QrcodeScanner) html5QrcodeScanner.stop().then(() => document.getElementById('scanner-modal').classList.add('hidden')); else document.getElementById('scanner-modal').classList.add('hidden'); }
 
         function triggerFileScan() { document.getElementById('file-scanner').click(); }
+        
+        // 核心修复：更强大的照片文件解析流程，并增加加载提示
         function scanFromFile(e) {
-            const f = e.target.files[0]; if(!f) return;
-            new Html5Qrcode("interactive").scanFile(f, true).then(txt => lookupBarcode(txt)).catch(() => showToast("❌ 无法识别该图片条码！", "error"));
+            const file = e.target.files[0]; 
+            if(!file) return;
+            
+            // 显示加载圈圈
+            const overlay = document.getElementById('file-loading-overlay');
+            overlay.classList.remove('hidden');
+            
+            const html5QrCode = new Html5Qrcode("interactive");
+            
+            // 使用 scanFile 处理图片，如果失败，给出清晰的提示
+            html5QrCode.scanFile(file, true)
+                .then(decodedText => {
+                    overlay.classList.add('hidden');
+                    e.target.value = ""; // 清空 input 防止下次选同一张图不触发
+                    lookupBarcode(decodedText);
+                })
+                .catch(err => {
+                    overlay.classList.add('hidden');
+                    e.target.value = "";
+                    console.log("照片解析失败详情:", err);
+                    showToast("❌ 照片过于模糊或未找到条形码，请重试！", "error");
+                });
         }
 
         function addRecord() {
@@ -453,31 +480,18 @@
             lucide.createIcons();
         }
 
-        // ================== 核心功能：字典数据同步 (Export/Import) ==================
-        function openSyncModal() {
-            document.getElementById('sync-code-area').value = "";
-            document.getElementById('sync-modal').classList.remove('hidden');
-            lucide.createIcons();
-        }
+        function openSyncModal() { document.getElementById('sync-code-area').value = ""; document.getElementById('sync-modal').classList.remove('hidden'); lucide.createIcons(); }
         function closeSyncModal() { document.getElementById('sync-modal').classList.add('hidden'); }
 
         function exportDBFile() {
-            const dataStr = JSON.stringify(productDB, null, 2);
-            const blob = new Blob([dataStr], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url; link.download = `SOIL_DB_Backup_${new Date().toISOString().slice(0,10)}.json`;
-            document.body.appendChild(link); link.click(); document.body.removeChild(link);
-            showToast("✅ 字典备份文件已导出！");
+            const dataStr = JSON.stringify(productDB, null, 2); const blob = new Blob([dataStr], { type: "application/json" }); const url = URL.createObjectURL(blob);
+            const link = document.createElement("a"); link.href = url; link.download = `SOIL_DB_Backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(link); link.click(); document.body.removeChild(link); showToast("✅ 字典备份文件已导出！");
         }
 
         function triggerImportDB() { document.getElementById('import-db-file').click(); }
         function importDBFromFile(e) {
-            const file = e.target.files[0]; if(!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                try { const imported = JSON.parse(evt.target.result); mergeDB(imported); } catch(err) { showToast("❌ 文件格式错误，导入失败！", "error"); }
-            };
+            const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
+            reader.onload = function(evt) { try { const imported = JSON.parse(evt.target.result); mergeDB(imported); } catch(err) { showToast("❌ 文件格式错误，导入失败！", "error"); } };
             reader.readAsText(file); e.target.value = ""; 
         }
 
@@ -485,31 +499,23 @@
             const keys = Object.keys(productDB); if(keys.length === 0) return;
             let csv = "\ufeff\"Barcode\",\"Brand\",\"Rating\",\"Model\",\"Product Code\",\"Type\"\r\n";
             keys.forEach(k => { const p = productDB[k]; csv += `"${k}","${p.brand}","${p.rating}","${p.model}","${p.productCode || ''}","${p.type}"\r\n`; });
-            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" }); 
-            const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = `SOIL_Dictionary_${new Date().toISOString().slice(0,10)}.csv`; 
-            document.body.appendChild(link); link.click(); document.body.removeChild(link);
-            showToast("✅ 字典 CSV 表格已导出！");
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = `SOIL_Dictionary_${new Date().toISOString().slice(0,10)}.csv`; document.body.appendChild(link); link.click(); document.body.removeChild(link); showToast("✅ 字典 CSV 表格已导出！");
         }
 
         function copyDBCode() {
-            const dataStr = JSON.stringify(productDB);
-            const ta = document.getElementById('sync-code-area'); ta.value = dataStr; ta.select(); document.execCommand('copy');
-            showToast("📋 字典代码已复制！通过微信发给同事即可");
+            const dataStr = JSON.stringify(productDB); const ta = document.getElementById('sync-code-area'); ta.value = dataStr; ta.select(); document.execCommand('copy'); showToast("📋 字典代码已复制！通过微信发给同事即可");
         }
 
         function importDBFromCode() {
-            const val = document.getElementById('sync-code-area').value.trim();
-            if(!val) { showToast("⚠️ 请先粘贴代码！", "error"); return; }
+            const val = document.getElementById('sync-code-area').value.trim(); if(!val) { showToast("⚠️ 请先粘贴代码！", "error"); return; }
             try { const imported = JSON.parse(val); mergeDB(imported); document.getElementById('sync-code-area').value = ""; } catch(err) { showToast("❌ 代码格式无效，请检查！", "error"); }
         }
 
         function mergeDB(importedData) {
-            if(typeof importedData !== 'object' || importedData === null) throw new Error();
-            let count = 0;
+            if(typeof importedData !== 'object' || importedData === null) throw new Error(); let count = 0;
             for(const key in importedData) { if(importedData.hasOwnProperty(key)) { productDB[key] = importedData[key]; count++; } }
             localStorage.setItem('sirim_product_db_v2', JSON.stringify(productDB)); updateUIDB(); closeSyncModal(); showToast(`✅ 成功导入并合并 ${count} 个条码！`);
         }
-        // =========================================================================
 
         function addNewProduct() {
             const bc = document.getElementById('new-barcode').value.trim(); const br = document.getElementById('new-brand').value.trim();
@@ -521,10 +527,7 @@
             localStorage.setItem('sirim_product_db_v2', JSON.stringify(productDB)); updateUIDB(); clearDBForm(); showToast("✅ 成功更新本地字典！");
         }
 
-        function clearDBForm() {
-            document.getElementById('new-barcode').value = ""; document.getElementById('new-brand').value = "S-OIL"; document.getElementById('new-rating').value = "";
-            document.getElementById('new-product-code').value = ""; document.getElementById('new-model').value = ""; document.getElementById('new-type').value = "SYNTHETIC";
-        }
+        function clearDBForm() { document.getElementById('new-barcode').value = ""; document.getElementById('new-brand').value = "S-OIL"; document.getElementById('new-rating').value = ""; document.getElementById('new-product-code').value = ""; document.getElementById('new-model').value = ""; document.getElementById('new-type').value = "SYNTHETIC"; }
         
         function editDBProduct(bc) {
             const p = productDB[bc]; if(!p) return;
@@ -540,11 +543,7 @@
             });
         }
         
-        function deleteDBProduct(bc) { 
-            showConfirm("删除字典项？", `确定要永久删除该型号吗？`, function() {
-                delete productDB[bc]; localStorage.setItem('sirim_product_db_v2', JSON.stringify(productDB)); updateUIDB(); showToast("✅ 已成功删除该型号");
-            });
-        }
+        function deleteDBProduct(bc) { showConfirm("删除字典项？", `确定要永久删除该型号吗？`, function() { delete productDB[bc]; localStorage.setItem('sirim_product_db_v2', JSON.stringify(productDB)); updateUIDB(); showToast("✅ 已成功删除该型号"); }); }
         
         function updateUIDB() {
             const keys = Object.keys(productDB); document.getElementById('db-count').innerText = keys.length;
