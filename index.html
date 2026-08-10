@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SIRIM 引擎机油扫码点货系统</title>
+    <title>SIRIM 引擎机油管理系统</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -11,28 +11,28 @@
     <!-- HTML5 QR Code Library -->
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        body {
-            background-color: #f1f5f9;
-            -webkit-tap-highlight-color: transparent;
-        }
-        /* 隐藏滚动条但保持可用 */
+        body { background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="font-sans text-slate-800 antialiased selection:bg-blue-500 selection:text-white">
 
-    <div class="max-w-md mx-auto min-h-screen flex flex-col bg-slate-50 shadow-2xl shadow-slate-300 relative pb-48">
+    <div class="max-w-md mx-auto min-h-screen flex flex-col bg-slate-50 shadow-2xl shadow-slate-300 relative pb-28">
         
         <!-- Premium 头部 -->
-        <header class="bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-800 text-white px-5 py-6 rounded-b-[2.5rem] shadow-xl relative overflow-hidden">
+        <header class="bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-800 text-white px-5 py-6 rounded-b-[2.5rem] shadow-xl relative overflow-hidden shrink-0">
             <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
             <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-indigo-500/20 rounded-full blur-xl"></div>
-            
             <div class="relative z-10 flex justify-between items-center">
                 <div>
                     <span class="text-[10px] bg-blue-500/40 text-blue-100 font-bold tracking-widest uppercase px-2.5 py-1 rounded-full border border-blue-400/30">Warehouse Management</span>
-                    <h1 class="text-2xl font-black tracking-tight mt-1">S-OIL 智能管库</h1>
+                    <h1 class="text-2xl font-black tracking-tight mt-1 flex items-center gap-2">
+                        <span id="app-main-title">S-OIL 智能管库</span>
+                        <button onclick="openEditTitleModal()" class="text-blue-200 hover:text-white p-1 rounded-lg active:scale-95 transition-all">
+                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                        </button>
+                    </h1>
                     <p class="text-xs text-blue-100/80 mt-0.5 font-medium flex items-center gap-1">
                         <i data-lucide="boxes" class="w-3 h-3 text-amber-300"></i> 入库 / 出货 / 存货查询
                     </p>
@@ -46,42 +46,38 @@
         <!-- 顶部通告 Banner -->
         <div id="toast" class="fixed top-4 left-4 right-4 z-50 bg-slate-900/95 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center justify-between hidden transition-all duration-300 transform translate-y-[-20px] opacity-0 border border-slate-700/50 backdrop-blur-md">
             <div class="flex items-center gap-2">
-                <div id="toast-icon-bg" class="p-1 rounded-lg bg-emerald-500/20 text-emerald-400">
-                    <i id="toast-icon" data-lucide="check-circle" class="w-4 h-4"></i>
-                </div>
-                <span id="toast-msg" class="text-xs font-semibold">操作成功！</span>
+                <div id="toast-icon-bg" class="p-1 rounded-lg bg-emerald-500/20 text-emerald-400"><i id="toast-icon" data-lucide="check-circle" class="w-4 h-4"></i></div>
+                <span id="toast-msg" class="text-xs font-semibold">成功！</span>
             </div>
-            <button onclick="closeToast()" class="text-slate-400 hover:text-white transition-colors">
-                <i data-lucide="x" class="w-4 h-4"></i>
-            </button>
+            <button onclick="closeToast()" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
 
-        <!-- 底部导航 (升级为 5 个 Tab，包含库存) -->
-        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-lg border-t border-slate-100 px-2 py-3 flex justify-between items-center z-40 rounded-t-[2rem] shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
-            <button id="nav-scan" onclick="switchTab('scan')" class="flex-1 flex flex-col items-center gap-1 text-blue-600 transition-all duration-200 scale-105">
+        <!-- 底部导航 (5个按钮) -->
+        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-xl border-t border-slate-200 px-2 py-3 flex justify-around items-center z-40 rounded-t-[2rem] shadow-[0_-15px_40px_rgba(0,0,0,0.06)] pb-safe">
+            <button id="nav-scan" onclick="switchTab('scan')" class="flex flex-col items-center gap-1 text-blue-600 transition-all duration-200 w-1/5 scale-105">
                 <div class="p-1.5 rounded-xl bg-blue-50"><i data-lucide="clipboard-edit" class="w-5 h-5"></i></div>
                 <span class="text-[9px] font-bold">盘点入库</span>
             </button>
-            <button id="nav-dispatch" onclick="switchTab('dispatch')" class="flex-1 flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition-all duration-200">
+            <button id="nav-dispatch" onclick="switchTab('dispatch')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition-all duration-200 w-1/5">
                 <div class="p-1.5 rounded-xl"><i data-lucide="truck" class="w-5 h-5"></i></div>
                 <span class="text-[9px] font-bold">出货登记</span>
             </button>
-            <button id="nav-stock" onclick="switchTab('stock')" class="flex-1 flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition-all duration-200">
+            <button id="nav-stock" onclick="switchTab('stock')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition-all duration-200 w-1/5">
                 <div class="p-1.5 rounded-xl"><i data-lucide="boxes" class="w-5 h-5"></i></div>
                 <span class="text-[9px] font-bold">当前库存</span>
             </button>
-            <button id="nav-db" onclick="switchTab('db')" class="flex-1 flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition-all duration-200">
-                <div class="p-1.5 rounded-xl"><i data-lucide="library" class="w-5 h-5"></i></div>
-                <span class="text-[9px] font-bold">字典(<span id="db-count">0</span>)</span>
-            </button>
-            <button id="nav-records" onclick="switchTab('records')" class="flex-1 flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition-all duration-200 relative">
+            <button id="nav-records" onclick="switchTab('records')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition-all duration-200 relative w-1/5">
                 <div class="p-1.5 rounded-xl"><i data-lucide="file-clock" class="w-5 h-5"></i></div>
                 <span class="text-[9px] font-bold">记录本</span>
-                <span id="badge-count" class="absolute -top-1 right-2 bg-rose-500 text-white font-black text-[9px] w-4 h-4 rounded-full flex items-center justify-center border-2 border-white hidden">0</span>
+                <span id="badge-count" class="absolute -top-1 right-2 bg-rose-500 text-white font-black text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white hidden">0</span>
+            </button>
+            <button id="nav-db" onclick="switchTab('db')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition-all duration-200 w-1/5">
+                <div class="p-1.5 rounded-xl"><i data-lucide="book-open" class="w-5 h-5"></i></div>
+                <span class="text-[9px] font-bold">条码字典</span>
             </button>
         </nav>
 
-        <main class="flex-1 px-4 py-6">
+        <main class="flex-1 px-4 py-5 overflow-y-auto">
             
             <!-- 公用的匹配结果状态卡片 (供盘点和出货共用) -->
             <div class="bg-slate-900 text-white p-5 rounded-3xl border border-slate-800 shadow-xl space-y-3 relative overflow-hidden mb-5">
@@ -255,14 +251,12 @@
                     </div>
                 </div>
 
-                <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-bold text-sm text-slate-800">本地已登记条码库</h3>
-                        <button onclick="openSyncModal()" class="text-[10px] text-blue-600 font-bold bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition-colors">
-                            <i data-lucide="database" class="w-3.5 h-3.5"></i> 备份与同步 (Export DB)
-                        </button>
+                <div class="bg-slate-50/50 p-2 space-y-3">
+                    <div class="flex justify-between items-center px-2">
+                        <h3 class="font-bold text-sm text-slate-800">字典库 (<span id="db-count">0</span>)</h3>
+                        <button onclick="openSyncModal()" class="text-[10px] text-blue-600 font-bold bg-blue-100 hover:bg-blue-200 px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors">备份与同步</button>
                     </div>
-                    <div id="db-list" class="space-y-2.5 max-h-[26rem] overflow-y-auto no-scrollbar"></div>
+                    <div id="db-list" class="space-y-3 pb-10"></div>
                 </div>
             </div>
 
@@ -278,7 +272,7 @@
                         </div>
                         <button onclick="clearRecords('inventory')" class="text-[10px] text-slate-400 hover:text-rose-500 font-bold">清空</button>
                     </div>
-                    <div id="records-container" class="space-y-2.5 max-h-[12rem] overflow-y-auto no-scrollbar"></div>
+                    <div id="records-container" class="space-y-2.5 max-h-[15rem] overflow-y-auto no-scrollbar"></div>
                     <button onclick="exportToCSV('inventory')" class="w-full bg-blue-50 text-blue-600 py-2.5 rounded-xl font-bold text-[11px] active:scale-[0.98] transition-all flex justify-center gap-1.5"><i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> 导出入库 SIRIM CSV</button>
                 </div>
 
@@ -299,9 +293,9 @@
         </main>
     </div>
 
-    <!-- Modals (Scanner, Export, Location, Confirm, Sync) -->
+    <!-- Modals (Scanner, Export, Location, Confirm, Sync, EditTitle) -->
     <div id="scanner-modal" class="fixed inset-0 bg-slate-950/95 z-50 flex flex-col justify-between hidden">
-        <div class="p-5 flex justify-between items-center text-white"><div><h3 class="font-bold text-base">扫描条形码</h3></div><button onclick="stopScanning()" class="bg-white/10 p-2.5 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+        <div class="p-5 flex justify-between items-center text-white"><div><h3 class="font-bold text-base" id="scan-title">扫码</h3></div><button onclick="stopScanning()" class="bg-white/10 p-2.5 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button></div>
         <div class="flex-1 flex items-center justify-center relative px-4"><div id="interactive" class="w-full max-w-sm aspect-[4/3] bg-slate-900 border-2 border-blue-500 overflow-hidden rounded-3xl relative"></div><div class="absolute w-[80%] max-w-[320px] h-[2px] bg-emerald-500 animate-bounce"></div></div>
     </div>
     
@@ -350,8 +344,29 @@
         </div>
     </div>
 
+    <!-- 确认弹窗 -->
     <div id="confirm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center px-4 hidden">
-        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4"><div class="flex items-center gap-3 text-amber-500"><h4 class="font-bold text-slate-800 text-base" id="confirm-title">确认</h4></div><p class="text-xs text-slate-500 leading-relaxed font-semibold" id="confirm-message"></p><div class="flex gap-2.5 justify-end pt-2"><button id="confirm-cancel" class="flex-1 px-4 py-3 bg-slate-50 text-slate-600 rounded-xl text-xs font-bold border">取消</button><button id="confirm-ok" class="flex-1 px-4 py-3 bg-rose-600 text-white rounded-xl text-xs font-bold">确定</button></div></div>
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl">
+            <h4 class="font-bold text-slate-800 text-base mb-2" id="confirm-title">确认</h4>
+            <p class="text-xs text-slate-500 mb-5 leading-relaxed font-semibold" id="confirm-message"></p>
+            <div class="flex gap-2.5 justify-end">
+                <button id="confirm-cancel" class="flex-1 px-4 py-3 bg-slate-50 border text-slate-600 rounded-xl text-xs font-bold">取消</button>
+                <button id="confirm-ok" class="flex-1 px-4 py-3 bg-rose-600 text-white rounded-xl text-xs font-bold shadow-md">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 标题修改弹窗 -->
+    <div id="edit-title-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center px-4 hidden">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl">
+            <h4 class="font-bold text-slate-800 text-base mb-2">修改系统名称</h4>
+            <p class="text-[11px] text-slate-500 mb-4">请输入新的仓库或系统名称：</p>
+            <input type="text" id="new-title-input" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-5" placeholder="例如: S-OIL 智能管库">
+            <div class="flex gap-2.5 justify-end">
+                <button onclick="closeEditTitleModal()" class="flex-1 px-4 py-3 bg-slate-50 border text-slate-600 rounded-xl text-xs font-bold">取消</button>
+                <button onclick="saveAppTitle()" class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl text-xs font-bold shadow-md">保存</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -370,6 +385,7 @@
         
         let html5QrcodeScanner = null, activeProduct = null, confirmCallback = null, generatedCSVData = "", currentExportType = "";
 
+        // --- 初始化载入 ---
         window.onload = function() { 
             lucide.createIcons(); 
             updateUIRecords(); 
@@ -381,8 +397,32 @@
             document.getElementById('manual-barcode').addEventListener('keypress', function(e){
                 if(e.key === 'Enter') lookupBarcode();
             });
+
+            // 初始化系统名称
+            let savedTitle = localStorage.getItem('sirim_app_title_v1') || "S-OIL 智能管库";
+            document.getElementById('app-main-title').innerText = savedTitle;
         };
 
+        // --- 系统名称修改逻辑 ---
+        function openEditTitleModal() {
+            document.getElementById('new-title-input').value = document.getElementById('app-main-title').innerText;
+            document.getElementById('edit-title-modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('new-title-input').focus(), 100);
+        }
+        function closeEditTitleModal() { document.getElementById('edit-title-modal').classList.add('hidden'); }
+        function saveAppTitle() {
+            const newTitle = document.getElementById('new-title-input').value.trim();
+            if(newTitle) {
+                localStorage.setItem('sirim_app_title_v1', newTitle);
+                document.getElementById('app-main-title').innerText = newTitle;
+                showToast("系统名称已更新！");
+                closeEditTitleModal();
+            } else {
+                showToast("名称不能为空", "error");
+            }
+        }
+
+        // --- UI 和确认弹窗处理 ---
         function updateUILocations() {
             document.getElementById('input-location').innerHTML = locationsDB.map(loc => `<option value="${loc}" ${loc === lastSelectedLocation ? 'selected' : ''}>${loc}</option>`).join('');
             document.getElementById('location-list-container').innerHTML = locationsDB.map(loc => `<div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl text-xs"><span class="font-bold flex-1 ${loc === lastSelectedLocation ? 'text-blue-600' : 'text-slate-700'}">${loc}</span><div class="flex items-center gap-1">${loc !== lastSelectedLocation ? `<button onclick="setAsDefaultLocation('${loc}')" class="text-[10px] bg-white border px-2 py-1 rounded-lg">默认</button>` : ''}<button onclick="deleteLocation('${loc}')" class="text-slate-300 hover:text-rose-500 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button></div></div>`).join('');
@@ -430,7 +470,7 @@
             activeNav.className = activeNav.className.replace('text-slate-400 hover:text-slate-600', 'text-blue-600 scale-105');
             activeNav.querySelector('div').classList.add('bg-blue-50');
             
-            if(tab === 'stock') updateUIRecords(); // 每次进库存页强制刷新计算
+            if(tab === 'stock') updateUIRecords(); 
             
             lucide.createIcons();
         }
@@ -442,6 +482,7 @@
         }
         function closeToast() { document.getElementById('toast').classList.add('hidden'); }
 
+        // --- 扫码和检索处理 ---
         function lookupBarcode(input = null) {
             const code = input || document.getElementById('manual-barcode').value.trim(); if(!code) return;
             document.getElementById('manual-barcode').value = code;
@@ -483,6 +524,7 @@
             new Html5Qrcode("interactive").scanFile(file, true).then(txt => { overlay.classList.add('hidden'); e.target.value = ""; lookupBarcode(txt); }).catch(err => { overlay.classList.add('hidden'); e.target.value = ""; showToast("❌ 照片过于模糊或未找到条形码！", "error"); });
         }
 
+        // --- 记录操作逻辑 ---
         function addRecord(type) {
             if(!activeProduct) { showToast("❌ 请先扫描机油条码！", "error"); return; }
             
@@ -546,7 +588,23 @@
             else {
                 document.getElementById('records-container').innerHTML = records.map((r) => {
                     const u = r.unit || 'CTN'; const displayUnit = u === 'BTL' ? '瓶' : '箱';
-                    return `<div class="bg-blue-50/50 border border-blue-100/50 p-3 rounded-2xl flex justify-between items-start text-xs"><div class="space-y-1 flex-1"><div class="font-extrabold text-blue-900">${r.brand} ${r.rating}</div><div class="text-slate-600 font-semibold truncate text-[10px] w-48">${r.model}</div><div class="flex gap-2 text-[10px] text-slate-500 pt-1 mt-1"><span>数量: <span class="font-bold text-blue-600">${r.qty} ${displayUnit}</span></span><span>代码: ${r.productCode}</span></div></div><button onclick="deleteRecord(${r.id}, 'inventory')" class="text-slate-300 hover:text-rose-500 p-1"><i data-lucide="x-circle" class="w-4 h-4"></i></button></div>`
+                    const dt = r.timestamp ? new Date(r.timestamp).toLocaleDateString() : '';
+                    return `
+                    <div class="bg-blue-50/50 border border-blue-100/50 p-3 rounded-2xl flex justify-between items-start text-xs relative">
+                        <div class="space-y-1 flex-1 pr-2">
+                            <div class="flex justify-between items-center w-full">
+                                <div class="font-extrabold text-blue-900">${r.brand} ${r.rating}</div>
+                                <div class="text-[9px] text-blue-600 bg-blue-100 px-1 rounded">${dt}</div>
+                            </div>
+                            <div class="text-slate-600 font-semibold truncate text-[10px] w-48">${r.model}</div>
+                            <div class="flex gap-2 text-[10px] text-slate-500 pt-1 mt-1">
+                                <span>数量: <span class="font-bold text-blue-600">${r.qty} ${displayUnit}</span></span>
+                                <span class="text-emerald-600 bg-emerald-50 px-1 rounded">代码: ${r.productCode}</span>
+                            </div>
+                            ${r.remark ? `<div class="text-[9px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 mt-1 inline-block rounded">备注: ${r.remark}</div>` : ''}
+                        </div>
+                        <button onclick="deleteRecord(${r.id}, 'inventory')" class="text-slate-300 hover:text-rose-500 p-1"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
+                    </div>`
                 }).join('');
             }
 
@@ -556,20 +614,34 @@
             else {
                 document.getElementById('dispatch-records-container').innerHTML = dispatchRecords.map((r) => {
                     const displayUnit = r.unit === 'BTL' ? '瓶' : '箱';
-                    return `<div class="bg-amber-50/50 border border-amber-100/50 p-3 rounded-2xl flex justify-between items-start text-xs"><div class="space-y-1 flex-1"><div class="flex justify-between items-center"><span class="font-extrabold text-amber-900 line-clamp-1 max-w-[120px]">${r.customer}</span><span class="text-[9px] text-amber-600 bg-amber-100 px-1 rounded">${r.date.slice(5)}</span></div><div class="text-slate-600 font-semibold truncate text-[10px] w-48">${r.brand} ${r.rating}</div><div class="flex gap-2 text-[10px] text-slate-500 pt-1 mt-1"><span>发出: <span class="font-bold text-amber-600">${r.qty} ${displayUnit}</span></span><span>D.O: ${r.docNo || '-'}</span></div></div><button onclick="deleteRecord(${r.id}, 'dispatch')" class="text-slate-300 hover:text-rose-500 p-1"><i data-lucide="x-circle" class="w-4 h-4"></i></button></div>`
+                    return `
+                    <div class="bg-amber-50/50 border border-amber-100/50 p-3 rounded-2xl flex justify-between items-start text-xs">
+                        <div class="space-y-1 flex-1 pr-2">
+                            <div class="flex justify-between items-center">
+                                <span class="font-extrabold text-amber-900 line-clamp-1 max-w-[120px]">${r.customer}</span>
+                                <span class="text-[9px] text-amber-600 bg-amber-100 px-1 rounded">${r.date.slice(5)}</span>
+                            </div>
+                            <div class="font-bold text-slate-800 text-[11px] pt-1">${r.brand} ${r.rating}</div>
+                            <div class="text-slate-500 font-medium truncate text-[9px] w-48">${r.model}</div>
+                            <div class="flex flex-wrap gap-2 text-[10px] text-slate-500 pt-1 mt-1 border-t border-amber-100">
+                                <span>发出: <span class="font-bold text-amber-600">${r.qty} ${displayUnit}</span></span>
+                                <span>D.O: ${r.docNo || '-'}</span>
+                                <span class="text-blue-600 bg-blue-50 px-1 rounded font-bold">代码: ${r.productCode || '-'}</span>
+                            </div>
+                        </div>
+                        <button onclick="deleteRecord(${r.id}, 'dispatch')" class="text-slate-300 hover:text-rose-500 p-1"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
+                    </div>`
                 }).join('');
             }
 
             // 3. 核心计算：生成当前实时库存结余 (Net Stock Balance)
             let balances = {};
-            // 累加所有入库
             records.forEach(r => {
                 let key = r.productCode + '_' + (r.unit || 'CTN');
                 if(!balances[key]) balances[key] = { model: r.model, code: r.productCode, rating: r.rating, brand: r.brand, unit: r.unit || 'CTN', in: 0, out: 0, net: 0 };
                 balances[key].in += r.qty;
                 balances[key].net += r.qty;
             });
-            // 扣除所有出货
             dispatchRecords.forEach(r => {
                 let key = r.productCode + '_' + (r.unit || 'CTN');
                 if(!balances[key]) balances[key] = { model: r.model, code: r.productCode, rating: r.rating, brand: r.brand, unit: r.unit || 'CTN', in: 0, out: 0, net: 0 };
@@ -609,15 +681,34 @@
             lucide.createIcons();
         }
 
-        function openSyncModal() { document.getElementById('sync-code-area').value = ""; document.getElementById('sync-modal').classList.remove('hidden'); lucide.createIcons(); }
-        function closeSyncModal() { document.getElementById('sync-modal').classList.add('hidden'); }
-        function exportDBFile() { const dataStr = JSON.stringify(productDB, null, 2); const blob = new Blob([dataStr], { type: "application/json" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = `SOIL_DB_Backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(link); link.click(); document.body.removeChild(link); showToast("✅ 字典备份文件已导出！"); }
-        function triggerImportDB() { document.getElementById('import-db-file').click(); }
-        function importDBFromFile(e) { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = function(evt) { try { const imported = JSON.parse(evt.target.result); mergeDB(imported); } catch(err) { showToast("❌ 文件格式错误，导入失败！", "error"); } }; reader.readAsText(file); e.target.value = ""; }
-        function exportDBCSV() { const keys = Object.keys(productDB); if(keys.length === 0) return; let csv = "\ufeff\"Barcode\",\"Brand\",\"Rating\",\"Model\",\"Product Code\",\"Type\"\r\n"; keys.forEach(k => { const p = productDB[k]; csv += `"${k}","${p.brand}","${p.rating}","${p.model}","${p.productCode || ''}","${p.type}"\r\n`; }); const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = `SOIL_Dictionary_${new Date().toISOString().slice(0,10)}.csv`; document.body.appendChild(link); link.click(); document.body.removeChild(link); showToast("✅ 字典 CSV 表格已导出！"); }
-        function copyDBCode() { const dataStr = JSON.stringify(productDB); const ta = document.getElementById('sync-code-area'); ta.value = dataStr; ta.select(); document.execCommand('copy'); showToast("📋 字典代码已复制！通过微信发给同事即可"); }
-        function importDBFromCode() { const val = document.getElementById('sync-code-area').value.trim(); if(!val) { showToast("⚠️ 请先粘贴代码！", "error"); return; } try { const imported = JSON.parse(val); mergeDB(imported); document.getElementById('sync-code-area').value = ""; } catch(err) { showToast("❌ 代码格式无效，请检查！", "error"); } }
-        function mergeDB(importedData) { if(typeof importedData !== 'object' || importedData === null) throw new Error(); let count = 0; for(const key in importedData) { if(importedData.hasOwnProperty(key)) { productDB[key] = importedData[key]; count++; } } localStorage.setItem('sirim_product_db_v2', JSON.stringify(productDB)); updateUIDB(); closeSyncModal(); showToast(`✅ 成功导入并合并 ${count} 个条码！`); }
+        // --- 字典维护 ---
+        function selectDBForScan(bc) { switchTab('scan'); lookupBarcode(bc); }
+        
+        function updateUIDB() {
+            const keys = Object.keys(productDB); document.getElementById('db-count').innerText = keys.length;
+            
+            document.getElementById('db-list').innerHTML = keys.map(k => {
+                const p = productDB[k];
+                return `
+                <div class="bg-white border border-slate-200 shadow-sm p-4 rounded-3xl flex justify-between items-center text-xs">
+                    <div class="space-y-1.5 flex-1 pr-3">
+                        <div class="text-[13px] font-black text-slate-800">${p.brand} ${p.rating}</div>
+                        <div class="text-[10px] text-slate-500 font-medium">${p.model}</div>
+                        <div class="text-[11px] font-bold text-blue-600 pt-1">Code: ${p.productCode || '-'}</div>
+                        <div class="text-[11px] font-bold text-emerald-600">Batch: ${p.batchNumber || k}</div>
+                    </div>
+                    <div class="flex flex-col gap-2 w-16 shrink-0">
+                        <button onclick="selectDBForScan('${k}')" class="bg-blue-600 text-white py-2 rounded-xl text-xs font-bold w-full shadow-md active:scale-95 transition-all">选择</button>
+                        <div class="flex gap-2 w-full">
+                            <button onclick="editDBProduct('${k}')" class="flex-1 bg-amber-50 hover:bg-amber-100 text-amber-600 py-1.5 rounded-xl flex items-center justify-center border border-amber-100 transition-colors"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+                            <button onclick="deleteDBProduct('${k}')" class="flex-1 bg-rose-50 hover:bg-rose-100 text-rose-600 py-1.5 rounded-xl flex items-center justify-center border border-rose-100 transition-colors"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+            
+            lucide.createIcons();
+        }
 
         function addNewProduct() {
             const bc = document.getElementById('new-barcode').value.trim(); const br = document.getElementById('new-brand').value.trim(); const rt = document.getElementById('new-rating').value.trim(); const md = document.getElementById('new-model').value.trim(); const ty = document.getElementById('new-type').value; const pc = document.getElementById('new-product-code').value.trim();
@@ -629,12 +720,19 @@
         function editDBProduct(bc) { const p = productDB[bc]; if(!p) return; document.getElementById('new-barcode').value = bc; document.getElementById('new-brand').value = p.brand; document.getElementById('new-rating').value = p.rating; document.getElementById('new-product-code').value = p.productCode || ""; document.getElementById('new-model').value = p.model; document.getElementById('new-type').value = p.type; window.scrollTo({ top: 0, behavior: 'smooth' }); showToast("✍️ 进入编辑模式，修改后请点击下方保存！"); }
         function resetDefaultDB() { showConfirm("恢复系统默认字典？", "这会覆盖掉您现有的部分条码！", function() { productDB = { ...defaultProducts }; localStorage.setItem('sirim_product_db_v2', JSON.stringify(productDB)); updateUIDB(); if(!document.getElementById('sync-modal').classList.contains('hidden')) { closeSyncModal(); } showToast("✅ 已恢复内置 S-OIL 库"); }); }
         function deleteDBProduct(bc) { showConfirm("删除字典项？", `确定要永久删除该型号吗？`, function() { delete productDB[bc]; localStorage.setItem('sirim_product_db_v2', JSON.stringify(productDB)); updateUIDB(); showToast("✅ 已成功删除该型号"); }); }
-        function updateUIDB() {
-            const keys = Object.keys(productDB); document.getElementById('db-count').innerText = keys.length;
-            document.getElementById('db-list').innerHTML = keys.map(k => `<div class="bg-slate-50 border p-3.5 rounded-2xl flex justify-between items-center text-xs"><div class="space-y-1 flex-1 pr-2"><span class="font-extrabold">${productDB[k].brand} ${productDB[k].rating}</span><div class="text-slate-500 text-[10px]">${productDB[k].model}</div><div class="text-[10px] text-blue-600 font-bold">Code: ${productDB[k].productCode || '无'}</div><div class="text-[10px] text-emerald-600 font-bold">Batch: ${productDB[k].batchNumber || k}</div></div><div class="flex flex-col gap-1.5 w-16"><button onclick="selectDBForScan('${k}')" class="bg-blue-600 text-white px-2 py-1.5 rounded-lg text-[10px] font-bold w-full text-center">选择</button><div class="flex gap-1.5 w-full"><button onclick="editDBProduct('${k}')" class="flex-1 bg-amber-100 hover:bg-amber-200 text-amber-700 py-1.5 rounded-lg flex items-center justify-center transition-colors" title="编辑"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></button><button onclick="deleteDBProduct('${k}')" class="flex-1 bg-rose-100 hover:bg-rose-200 text-rose-700 py-1.5 rounded-lg flex items-center justify-center transition-colors" title="删除"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button></div></div></div>`).join('');
-            lucide.createIcons();
-        }
 
+        // --- 同步管理逻辑 ---
+        function openSyncModal() { document.getElementById('sync-code-area').value = ""; document.getElementById('sync-modal').classList.remove('hidden'); lucide.createIcons(); }
+        function closeSyncModal() { document.getElementById('sync-modal').classList.add('hidden'); }
+        function exportDBFile() { const dataStr = JSON.stringify(productDB, null, 2); const blob = new Blob([dataStr], { type: "application/json" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = `SOIL_DB_Backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(link); link.click(); document.body.removeChild(link); showToast("✅ 字典备份文件已导出！"); }
+        function triggerImportDB() { document.getElementById('import-db-file').click(); }
+        function importDBFromFile(e) { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = function(evt) { try { const imported = JSON.parse(evt.target.result); mergeDB(imported); } catch(err) { showToast("❌ 文件格式错误，导入失败！", "error"); } }; reader.readAsText(file); e.target.value = ""; }
+        function exportDBCSV() { const keys = Object.keys(productDB); if(keys.length === 0) return; let csv = "\ufeff\"Barcode\",\"Brand\",\"Rating\",\"Model\",\"Product Code\",\"Type\"\r\n"; keys.forEach(k => { const p = productDB[k]; csv += `"${k}","${p.brand}","${p.rating}","${p.model}","${p.productCode || ''}","${p.type}"\r\n`; }); const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = `SOIL_Dictionary_${new Date().toISOString().slice(0,10)}.csv`; document.body.appendChild(link); link.click(); document.body.removeChild(link); showToast("✅ 字典 CSV 表格已导出！"); }
+        function copyDBCode() { const dataStr = JSON.stringify(productDB); const ta = document.getElementById('sync-code-area'); ta.value = dataStr; ta.select(); document.execCommand('copy'); showToast("📋 字典代码已复制！通过微信发给同事即可"); }
+        function importDBFromCode() { const val = document.getElementById('sync-code-area').value.trim(); if(!val) { showToast("⚠️ 请先粘贴代码！", "error"); return; } try { const imported = JSON.parse(val); mergeDB(imported); document.getElementById('sync-code-area').value = ""; } catch(err) { showToast("❌ 代码格式无效，请检查！", "error"); } }
+        function mergeDB(importedData) { if(typeof importedData !== 'object' || importedData === null) throw new Error(); let count = 0; for(const key in importedData) { if(importedData.hasOwnProperty(key)) { productDB[key] = importedData[key]; count++; } } localStorage.setItem('sirim_product_db_v2', JSON.stringify(productDB)); updateUIDB(); closeSyncModal(); showToast(`✅ 成功导入并合并 ${count} 个条码！`); }
+
+        // --- 报表导出逻辑 ---
         function exportToCSV(type) {
             currentExportType = type;
             let csv = "\ufeff";
