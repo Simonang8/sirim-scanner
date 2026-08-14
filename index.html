@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SIRIM 引擎机油管理系统</title>
+    <title>S-OIL 智能管库与订单系统</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -16,34 +16,30 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="font-sans text-slate-800 antialiased selection:bg-blue-500 selection:text-white">
+<body class="font-sans text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
 
     <div class="max-w-md mx-auto min-h-screen flex flex-col bg-slate-50 shadow-2xl shadow-slate-300 relative pb-28">
         
-        <!-- Premium 头部 -->
-        <header class="bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-800 text-white px-5 py-6 rounded-b-[2.5rem] shadow-xl relative overflow-hidden shrink-0">
+        <!-- App Header -->
+        <header class="bg-gradient-to-br from-indigo-800 via-indigo-700 to-blue-900 text-white px-5 py-5 rounded-b-[2.5rem] shadow-xl relative overflow-hidden shrink-0">
             <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-            <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-indigo-500/20 rounded-full blur-xl"></div>
+            <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-blue-500/20 rounded-full blur-xl"></div>
             <div class="relative z-10 flex justify-between items-center">
                 <div>
-                    <span class="text-[10px] bg-blue-500/40 text-blue-100 font-bold tracking-widest uppercase px-2.5 py-1 rounded-full border border-blue-400/30">Warehouse Management</span>
-                    <h1 class="text-2xl font-black tracking-tight mt-1 flex items-center gap-2">
-                        <span id="app-main-title">S-OIL 智能管库</span>
-                        <button onclick="openEditTitleModal()" class="text-blue-200 hover:text-white p-1 rounded-lg active:scale-95 transition-all">
-                            <i data-lucide="edit-3" class="w-4 h-4"></i>
-                        </button>
-                    </h1>
-                    <p class="text-xs text-blue-100/80 mt-0.5 font-medium flex items-center gap-1">
-                        <i data-lucide="boxes" class="w-3 h-3 text-amber-300"></i> 入库 / 出货 / 存货查询
-                    </p>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[9px] bg-indigo-500/40 text-indigo-100 font-bold tracking-widest uppercase px-2 py-0.5 rounded-full border border-indigo-400/30">Warehouse & Sales</span>
+                        <button onclick="editAppName()" class="text-indigo-200 hover:text-white"><i data-lucide="edit-2" class="w-3 h-3"></i></button>
+                    </div>
+                    <h1 id="app-title-display" class="text-xl font-black tracking-tight mt-1">S-OIL 智能管库</h1>
+                    <p class="text-[11px] text-indigo-100/80 mt-0.5 font-medium">开单 · 盘点 · 出库 · 实时库存</p>
                 </div>
-                <div class="bg-white/15 p-3 rounded-2xl backdrop-blur-md border border-white/10 shadow-inner">
-                    <i data-lucide="scan-barcode" class="w-7 h-7 text-white"></i>
+                <div class="bg-white/15 p-2.5 rounded-2xl backdrop-blur-md border border-white/10 shadow-inner">
+                    <i data-lucide="boxes" class="w-6 h-6 text-white"></i>
                 </div>
             </div>
         </header>
 
-        <!-- 顶部通告 Banner -->
+        <!-- Toast Notification -->
         <div id="toast" class="fixed top-4 left-4 right-4 z-50 bg-slate-900/95 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center justify-between hidden transition-all duration-300 transform translate-y-[-20px] opacity-0 border border-slate-700/50 backdrop-blur-md">
             <div class="flex items-center gap-2">
                 <div id="toast-icon-bg" class="p-1 rounded-lg bg-emerald-500/20 text-emerald-400"><i id="toast-icon" data-lucide="check-circle" class="w-4 h-4"></i></div>
@@ -52,202 +48,353 @@
             <button onclick="closeToast()" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
 
-        <!-- 底部导航 (5个按钮) -->
-        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-xl border-t border-slate-200 px-2 py-3 flex justify-around items-center z-40 rounded-t-[2rem] shadow-[0_-15px_40px_rgba(0,0,0,0.06)] pb-safe">
-            <button id="nav-scan" onclick="switchTab('scan')" class="flex flex-col items-center gap-1 text-blue-600 transition-all duration-200 w-1/5 scale-105">
-                <div class="p-1.5 rounded-xl bg-blue-50"><i data-lucide="clipboard-edit" class="w-5 h-5"></i></div>
-                <span class="text-[9px] font-bold">盘点入库</span>
+        <!-- Bottom Navigation Bar (6 Tabs) -->
+        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-xl border-t border-slate-200 px-1.5 py-2.5 flex justify-around items-center z-40 rounded-t-[2rem] shadow-[0_-15px_40px_rgba(0,0,0,0.06)] pb-safe">
+            <button id="nav-order" onclick="switchTab('order')" class="flex flex-col items-center gap-0.5 text-indigo-600 transition-all duration-200 w-1/6 scale-105">
+                <div class="p-1 rounded-xl bg-indigo-50"><i data-lucide="file-signature" class="w-4 h-4"></i></div>
+                <span class="text-[8.5px] font-bold">Order Hub</span>
             </button>
-            <button id="nav-dispatch" onclick="switchTab('dispatch')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition-all duration-200 w-1/5">
-                <div class="p-1.5 rounded-xl"><i data-lucide="truck" class="w-5 h-5"></i></div>
-                <span class="text-[9px] font-bold">出货登记</span>
+            <button id="nav-scan" onclick="switchTab('scan')" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-600 transition-all duration-200 w-1/6">
+                <div class="p-1 rounded-xl"><i data-lucide="clipboard-check" class="w-4 h-4"></i></div>
+                <span class="text-[8.5px] font-bold">盘点入库</span>
             </button>
-            <button id="nav-stock" onclick="switchTab('stock')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition-all duration-200 w-1/5">
-                <div class="p-1.5 rounded-xl"><i data-lucide="boxes" class="w-5 h-5"></i></div>
-                <span class="text-[9px] font-bold">当前库存</span>
+            <button id="nav-dispatch" onclick="switchTab('dispatch')" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-600 transition-all duration-200 w-1/6">
+                <div class="p-1 rounded-xl"><i data-lucide="truck" class="w-4 h-4"></i></div>
+                <span class="text-[8.5px] font-bold">出货登记</span>
             </button>
-            <button id="nav-records" onclick="switchTab('records')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition-all duration-200 relative w-1/5">
-                <div class="p-1.5 rounded-xl"><i data-lucide="file-clock" class="w-5 h-5"></i></div>
-                <span class="text-[9px] font-bold">记录本</span>
-                <span id="badge-count" class="absolute -top-1 right-2 bg-rose-500 text-white font-black text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white hidden">0</span>
+            <button id="nav-balance" onclick="switchTab('balance')" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-600 transition-all duration-200 w-1/6">
+                <div class="p-1 rounded-xl"><i data-lucide="layers" class="w-4 h-4"></i></div>
+                <span class="text-[8.5px] font-bold">当前库存</span>
             </button>
-            <button id="nav-db" onclick="switchTab('db')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition-all duration-200 w-1/5">
-                <div class="p-1.5 rounded-xl"><i data-lucide="book-open" class="w-5 h-5"></i></div>
-                <span class="text-[9px] font-bold">条码字典</span>
+            <button id="nav-records" onclick="switchTab('records')" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-600 transition-all duration-200 relative w-1/6">
+                <div class="p-1 rounded-xl"><i data-lucide="clipboard-list" class="w-4 h-4"></i></div>
+                <span class="text-[8.5px] font-bold">明细记录</span>
+                <span id="badge-count" class="absolute -top-1 right-1 bg-rose-500 text-white font-black text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white hidden">0</span>
+            </button>
+            <button id="nav-db" onclick="switchTab('db')" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-600 transition-all duration-200 w-1/6">
+                <div class="p-1 rounded-xl"><i data-lucide="book-open" class="w-4 h-4"></i></div>
+                <span class="text-[8.5px] font-bold">条码字典</span>
             </button>
         </nav>
 
-        <main class="flex-1 px-4 py-5 overflow-y-auto">
+        <main class="flex-1 px-4 py-4 overflow-y-auto">
             
-            <!-- 公用的匹配结果状态卡片 (供盘点和出货共用) -->
-            <div class="bg-slate-900 text-white p-5 rounded-3xl border border-slate-800 shadow-xl space-y-3 relative overflow-hidden mb-5">
-                <div class="absolute -right-6 -bottom-6 w-20 h-20 bg-blue-500/10 rounded-full blur-xl"></div>
-                <div class="flex justify-between items-center border-b border-slate-800 pb-2.5">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">机油匹配结果 / SCAN RESULT</span>
-                    <span id="match-status" class="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 font-bold border border-slate-700">等待扫码</span>
-                </div>
-                <div class="grid grid-cols-2 gap-3.5 text-xs">
-                    <div><span class="text-slate-400 block text-[10px] mb-0.5">Brand</span><span id="preview-brand" class="font-bold text-slate-200">-</span></div>
-                    <div><span class="text-slate-400 block text-[10px] mb-0.5">Rating</span><span id="preview-rating" class="font-bold text-slate-200">-</span></div>
-                    <div class="col-span-2"><span class="text-slate-400 block text-[10px] mb-0.5">Model</span><span id="preview-model" class="font-bold text-slate-200">-</span></div>
-                    <div><span class="text-slate-400 block text-[10px] mb-0.5">Type</span><span id="preview-type" class="font-bold text-slate-200">-</span></div>
-                    <div><span class="text-slate-400 block text-[10px] mb-0.5">Product Code</span><span id="preview-code" class="font-bold text-blue-400">-</span></div>
-                </div>
-                
-                <!-- 扫码动作区 -->
-                <div class="pt-3 border-t border-slate-800 flex gap-2">
-                    <div class="relative flex-1">
-                        <i data-lucide="hash" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3"></i>
-                        <input type="text" id="manual-barcode" placeholder="在此输入或扫描条码..." class="w-full pl-8 pr-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-[11px] font-semibold text-white focus:outline-none focus:border-blue-500">
+            <!-- ================== TAB 0: ORDER HUB (开单中心) ================== -->
+            <div id="tab-order" class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-1.5">
+                        <i data-lucide="file-signature" class="w-5 h-5 text-indigo-600"></i>
+                        <h2 class="font-black text-slate-800 text-base">Order Hub 开单</h2>
                     </div>
-                    <button onclick="startScanning()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 rounded-lg flex items-center justify-center transition-colors"><i data-lucide="scan" class="w-4 h-4"></i></button>
-                    <button onclick="triggerFileScan()" class="bg-slate-700 hover:bg-slate-600 text-white px-3 rounded-lg flex items-center justify-center transition-colors relative">
-                        <i data-lucide="image" class="w-4 h-4"></i>
-                        <div id="file-loading-overlay" class="absolute inset-0 bg-slate-800/80 rounded-lg flex items-center justify-center hidden"><i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin text-blue-400"></i></div>
+                    <button onclick="openPricingModal()" class="bg-indigo-900 hover:bg-indigo-950 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-xl flex items-center gap-1 active:scale-95 shadow-sm transition-all">
+                        <i data-lucide="sliders" class="w-3.5 h-3.5 text-emerald-400"></i> 价格与折扣设置
                     </button>
-                    <input type="file" id="file-scanner" accept="image/*" class="hidden" onchange="scanFromFile(event)">
+                </div>
+
+                <div class="bg-white p-4 rounded-3xl border border-indigo-100 shadow-sm space-y-3">
+                    
+                    <!-- Customer Selection & Sync Button -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-[11px] font-bold text-slate-700">Customer Name (客户名字)</label>
+                            <button onclick="openCustomerModal()" class="text-[10px] text-indigo-600 font-bold bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded-lg flex items-center gap-1 transition-colors active:scale-95">
+                                <i data-lucide="users" class="w-3 h-3 text-indigo-500"></i> 管理与备份同步
+                            </button>
+                        </div>
+                        <select id="order-customer" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <!-- Product Selection -->
+                    <div class="border-t border-slate-100 pt-3">
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label class="block text-[11px] font-bold text-indigo-700">1. 选择产品 (检索/扫码)</label>
+                            <button onclick="startScanningOrder()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 shadow-sm active:scale-95">
+                                <i data-lucide="scan" class="w-3 h-3"></i> 扫码
+                            </button>
+                        </div>
+                        
+                        <div class="mb-2">
+                            <select id="order-product-select" onchange="lookupProductForOrder(this.value)" class="w-full px-3 py-2 bg-indigo-50/70 border border-indigo-200 rounded-xl text-xs font-bold text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="">-- 点击选择产品型号或代码 --</option>
+                            </select>
+                        </div>
+
+                        <!-- Auto-filled Details Area -->
+                        <div class="bg-indigo-50/40 p-3 rounded-2xl border border-indigo-100 space-y-2">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[9px] text-slate-500 font-bold mb-0.5">Select CODE</label>
+                                    <input type="text" id="order-code" readonly class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-black text-indigo-700 cursor-not-allowed">
+                                </div>
+                                <div>
+                                    <label class="block text-[9px] text-slate-500 font-bold mb-0.5">OLD NO (旧编号)</label>
+                                    <input type="text" id="order-old-no" readonly class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-amber-700 cursor-not-allowed">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[9px] text-slate-500 font-bold mb-0.5">Select Product PACKING</label>
+                                <textarea id="order-product-desc" rows="2" readonly class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-700 resize-none cursor-not-allowed leading-tight"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-[9px] text-slate-500 font-bold mb-0.5">Batch Number</label>
+                                <input type="text" id="order-batch" readonly class="w-full px-2.5 py-1.5 bg-slate-100 border border-slate-200 rounded-lg text-[10px] font-bold text-emerald-700 cursor-not-allowed">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quantity & Price Automation Area -->
+                    <div class="grid grid-cols-2 gap-2.5 pt-1">
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-700 mb-1">Quantity (CTN)</label>
+                            <input type="number" id="order-qty" value="1" min="1" oninput="calculateNet()" class="w-full px-3 py-2 bg-indigo-50 border border-indigo-300 rounded-xl text-sm font-black text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 mb-1">Unit Price (RM/CTN)</label>
+                            <input type="number" id="order-price" readonly placeholder="Auto" class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 cursor-not-allowed text-center">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-rose-600 mb-1">DISCOUNT (RM/CTN)</label>
+                            <input type="number" id="order-discount" placeholder="0.00" step="0.01" oninput="calculateNet()" class="w-full px-3 py-2 bg-rose-50 border border-rose-200 rounded-xl text-xs font-bold text-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 text-center">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-emerald-700 mb-1">NET Unit Price (RM)</label>
+                            <input type="text" id="order-net-price" readonly placeholder="0.00" class="w-full px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-black text-emerald-800 cursor-not-allowed text-center">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 mb-1">Points per CTN</label>
+                            <input type="number" id="order-points" readonly placeholder="Auto" class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-500 cursor-not-allowed text-center">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-amber-600 mb-1">Total Points</label>
+                            <input type="text" id="order-total-points" readonly placeholder="0" class="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-xs font-black text-amber-700 cursor-not-allowed text-center">
+                        </div>
+                    </div>
+
+                    <!-- Cart Item Actions -->
+                    <div class="flex gap-2 pt-2">
+                        <button onclick="addOrderLineItem()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold text-xs shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i> NEXT ITEM (加入订单)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Active Order Items Basket -->
+                <div class="bg-white p-4 rounded-3xl border border-indigo-100 shadow-sm space-y-3">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h3 class="font-bold text-xs text-indigo-900 flex items-center gap-1">
+                            <i data-lucide="shopping-cart" class="w-4 h-4 text-indigo-600"></i> 当前订单暂存清单
+                        </h3>
+                        <span id="order-cart-count" class="bg-indigo-100 text-indigo-800 text-[10px] font-bold px-2 py-0.5 rounded-full">0 项</span>
+                    </div>
+                    <div id="order-cart-list" class="space-y-2 max-h-48 overflow-y-auto no-scrollbar">
+                        <div class="text-center text-slate-400 text-xs py-4">订单暂存区为空，请先在上方录入项目</div>
+                    </div>
+                    <div id="order-summary-box" class="hidden border-t pt-2 space-y-1">
+                        <div class="flex justify-between text-xs font-bold text-slate-700">
+                            <span>应付总额 Total NET:</span>
+                            <span id="order-total-net" class="text-rose-600 font-black text-sm">RM 0.00</span>
+                        </div>
+                        <div class="flex justify-between text-[11px] font-bold text-slate-500">
+                            <span>获得总积分 Total Points:</span>
+                            <span id="order-total-pts" class="text-amber-600 font-bold">0 Pts</span>
+                        </div>
+                        <button onclick="saveFinalOrder()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-extrabold text-xs shadow-lg active:scale-95 transition-all mt-2 flex items-center justify-center gap-1.5">
+                            <i data-lucide="check-circle-2" class="w-4 h-4"></i> SAVE ORDER (提交订单)
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- ================== TAB 1: 盘点入库 (SIRIM) ================== -->
-            <div id="tab-scan" class="space-y-4">
-                <div class="flex items-center gap-2 mb-2">
-                    <i data-lucide="clipboard-check" class="w-5 h-5 text-blue-600"></i>
-                    <h2 class="font-black text-slate-800">盘点入库 (Inbound)</h2>
+            <!-- ================== TAB 1: 扫码及入库 (Scan / Receive) ================== -->
+            <div id="tab-scan" class="space-y-4 hidden">
+                <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center">
+                    <span class="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full mb-2">盘点入库专用</span>
+                    <h3 class="font-bold text-slate-800 text-xs mb-3">扫描条形码载入产品</h3>
+                    <div class="flex gap-3 w-full justify-center">
+                        <button onclick="startScanning()" class="w-20 h-20 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-2xl flex flex-col items-center justify-center shadow-md active:scale-95 transition-all"><i data-lucide="scan" class="w-6 h-6 mb-1"></i><span class="text-[10px] font-bold">相机扫码</span></button>
+                        <button onclick="triggerFileScan()" class="w-20 h-20 bg-slate-50 border border-slate-200 text-slate-600 rounded-2xl flex flex-col items-center justify-center active:scale-95 transition-all relative">
+                            <i data-lucide="image" class="w-6 h-6 text-slate-400 mb-1"></i><span class="text-[10px] font-bold">上传照片</span>
+                            <div id="file-loading-overlay" class="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-2xl hidden"><i data-lucide="loader-2" class="w-5 h-5 animate-spin text-blue-500"></i></div>
+                        </button>
+                        <input type="file" id="file-scanner" accept="image/*" class="hidden" onchange="scanFromFile(event)">
+                    </div>
+                    <div class="w-full mt-4 flex gap-2">
+                        <input type="text" id="manual-barcode" placeholder="手动输入条码号..." class="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button onclick="lookupBarcode()" class="bg-slate-800 text-white px-3 py-2 rounded-xl text-xs font-bold active:scale-95">检索</button>
+                    </div>
                 </div>
 
-                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">
-                    <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-900 text-white p-4 rounded-3xl shadow-xl relative overflow-hidden">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-2">
+                        <span class="text-[10px] font-bold text-slate-400">识别结果 (入库)</span>
+                        <span id="match-status" class="text-[9px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-bold border border-slate-700">等待扫码</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div><span class="text-slate-400 block text-[9px]">Brand</span><span id="preview-brand" class="font-bold">-</span></div>
+                        <div><span class="text-slate-400 block text-[9px]">Rating</span><span id="preview-rating" class="font-bold">-</span></div>
+                        <div class="col-span-2"><span class="text-slate-400 block text-[9px]">Model</span><span id="preview-model" class="font-bold">-</span></div>
+                        <div><span class="text-slate-400 block text-[9px]">Type</span><span id="preview-type" class="font-bold">-</span></div>
+                        <div><span class="text-slate-400 block text-[9px]">Product Code</span><span id="preview-code" class="font-bold text-blue-400">-</span></div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+                    <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-700 mb-1">Product Code</label>
-                            <input type="text" id="input-product-code" placeholder="自动带出" class="w-full px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <label class="block text-[10px] font-bold text-slate-600 mb-1">Product Code</label>
+                            <input type="text" id="input-product-code" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-700 mb-1 flex justify-between">Batch Number <span class="text-[9px] text-emerald-500 font-bold bg-emerald-50 px-1 rounded">自动</span></label>
-                            <input type="text" id="input-batch-number" readonly placeholder="条码同步" class="w-full px-3 py-3 bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-500 focus:outline-none cursor-not-allowed">
+                            <label class="block text-[10px] font-bold text-slate-600 mb-1">Batch Number</label>
+                            <input type="text" id="input-batch-number" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[10px] font-bold text-slate-500 focus:outline-none">
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-700 mb-1">Quantity (数量)</label>
-                            <div class="flex bg-slate-50 border border-slate-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
-                                <input type="number" id="input-qty" placeholder="如 50" class="w-full px-3 py-3 bg-transparent text-xs font-bold focus:outline-none">
+                            <label class="block text-[10px] font-bold text-slate-600 mb-1">入库数量 (+)</label>
+                            <div class="flex bg-slate-50 border border-slate-200 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
+                                <input type="number" id="input-qty" placeholder="0" class="w-full px-2 py-2 bg-transparent text-xs font-bold focus:outline-none">
                                 <div class="w-px bg-slate-200"></div>
-                                <select id="input-unit" class="bg-slate-100 py-3 px-2 text-[11px] font-bold text-slate-700 focus:outline-none">
-                                    <option value="CTN">箱</option>
-                                    <option value="BTL">瓶</option>
+                                <select id="input-unit" class="bg-slate-100 px-1 text-[10px] font-bold text-slate-700 focus:outline-none">
+                                    <option value="CTN">箱</option><option value="BTL">瓶</option>
                                 </select>
                             </div>
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-700 mb-1">Remark (备注)</label>
-                            <input type="text" id="input-remark" placeholder="选填" class="w-full px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <label class="block text-[10px] font-bold text-slate-600 mb-1">入库备注</label>
+                            <input type="text" id="input-remark" placeholder="选填" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
                     </div>
-
+                    
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-700 mb-1 flex justify-between">Stock Location <button onclick="openLocationManager()" class="text-[10px] text-blue-600 font-extrabold hover:underline">管理</button></label>
-                        <select id="input-location" onchange="saveLastLocation(this.value)" class="w-full px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"></select>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-[10px] font-bold text-slate-600">库存地点</label>
+                            <button onclick="openLocationManager()" class="text-[9px] text-blue-600 font-bold hover:underline">管理</button>
+                        </div>
+                        <select id="input-location" onchange="saveLastLocation(this.value)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold focus:outline-none"></select>
                     </div>
 
-                    <button onclick="addRecord('inventory')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-2xl font-bold text-sm shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-                        <i data-lucide="download" class="w-4 h-4"></i> 保存盘点入库
-                    </button>
+                    <button onclick="addRecord('receive')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95 transition-all">保存入库记录</button>
                 </div>
             </div>
 
-            <!-- ================== TAB 2: 出货登记 (Outbound) ================== -->
+            <!-- ================== TAB 2: 出货登记 (Dispatch) ================== -->
             <div id="tab-dispatch" class="space-y-4 hidden">
-                <div class="flex items-center gap-2 mb-2">
-                    <i data-lucide="truck" class="w-5 h-5 text-amber-500"></i>
-                    <h2 class="font-black text-slate-800">日常出货登记 (Outbound)</h2>
+                <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center">
+                    <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full mb-2">出货扣减库存专用</span>
+                    <h3 class="font-bold text-slate-800 text-xs mb-3">扫描出货物资</h3>
+                    <div class="flex gap-3 w-full justify-center">
+                        <button onclick="startScanningDispatch()" class="w-20 h-20 bg-amber-500 text-white rounded-2xl flex flex-col items-center justify-center shadow-md active:scale-95 transition-all"><i data-lucide="scan" class="w-6 h-6 mb-1"></i><span class="text-[10px] font-bold">扫码出库</span></button>
+                    </div>
+                    <div class="w-full mt-4 flex gap-2">
+                        <input type="text" id="manual-barcode-dispatch" placeholder="手动输入出货条码..." class="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none">
+                        <button onclick="lookupBarcodeDispatch()" class="bg-amber-600 text-white px-3 py-2 rounded-xl text-xs font-bold active:scale-95">检索</button>
+                    </div>
                 </div>
 
-                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">
-                    
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Customer / Receiver (客户/收货方)</label>
-                        <input type="text" id="disp-customer" placeholder="例如: Ah Boy Workshop" class="w-full px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-amber-500">
+                <div class="bg-amber-50 border border-amber-100 p-4 rounded-3xl space-y-3 relative overflow-hidden">
+                    <div class="flex justify-between items-center border-b border-amber-200 pb-2 mb-2">
+                        <span class="text-[10px] font-bold text-amber-800">识别结果 (出货)</span>
+                        <span id="match-status-dispatch" class="text-[9px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-600 font-bold border border-amber-200">等待</span>
                     </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-700 mb-1">D.O / Inv No.</label>
-                            <input type="text" id="disp-doc-no" placeholder="单据号码 (选填)" class="w-full px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-amber-500">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-700 mb-1">Dispatch Date</label>
-                            <input type="date" id="disp-date" class="w-full px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500">
-                        </div>
+                    <div class="text-xs space-y-1">
+                        <div class="font-extrabold text-slate-800" id="preview-brand-dispatch">-</div>
+                        <div class="text-[10px] text-slate-600" id="preview-model-dispatch">-</div>
                     </div>
+                </div>
 
-                    <div class="grid grid-cols-2 gap-3">
+                <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+                    <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-700 mb-1 text-amber-600">Out Quantity (发出数量)</label>
-                            <div class="flex bg-amber-50 border border-amber-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-amber-500">
-                                <input type="number" id="disp-qty" placeholder="扣除多少" class="w-full px-3 py-3 bg-transparent text-xs font-bold focus:outline-none">
-                                <div class="w-px bg-amber-200"></div>
-                                <select id="disp-unit" class="bg-amber-100 py-3 px-2 text-[11px] font-bold text-amber-800 focus:outline-none">
-                                    <option value="CTN">箱</option>
-                                    <option value="BTL">瓶</option>
+                            <label class="block text-[10px] font-bold text-slate-600 mb-1">出货数量 (-)</label>
+                            <div class="flex bg-slate-50 border border-slate-200 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-amber-500">
+                                <input type="number" id="dispatch-qty" placeholder="0" class="w-full px-2 py-2 bg-transparent text-xs font-bold focus:outline-none">
+                                <div class="w-px bg-slate-200"></div>
+                                <select id="dispatch-unit" class="bg-slate-100 px-1 text-[10px] font-bold text-slate-700 focus:outline-none">
+                                    <option value="CTN">箱</option><option value="BTL">瓶</option>
                                 </select>
                             </div>
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-700 mb-1">Remark (备注)</label>
-                            <input type="text" id="disp-remark" placeholder="如：车牌号" class="w-full px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <label class="block text-[10px] font-bold text-slate-600 mb-1">出货日期</label>
+                            <input type="date" id="dispatch-date" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold focus:outline-none text-slate-600">
                         </div>
                     </div>
-
-                    <button onclick="addRecord('dispatch')" class="w-full bg-amber-500 hover:bg-amber-600 text-white py-3.5 rounded-2xl font-bold text-sm shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-                        <i data-lucide="upload" class="w-4 h-4"></i> 保存出货单
-                    </button>
-                </div>
-            </div>
-
-            <!-- ================== TAB 3: 当前库存结余 (Stock Balance - NEW) ================== -->
-            <div id="tab-stock" class="space-y-4 hidden">
-                <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="boxes" class="w-5 h-5 text-emerald-600"></i>
-                        <h2 class="font-black text-slate-800">当前存货结余</h2>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 mb-1">客户 / 接收方</label>
+                            <input type="text" id="dispatch-customer" placeholder="必填" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 mb-1">出货单号 (DO No.)</label>
+                            <input type="text" id="dispatch-do" placeholder="必填" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        </div>
                     </div>
-                    <button onclick="exportToCSV('stock')" class="text-[10px] bg-emerald-50 text-emerald-600 px-2.5 py-1.5 rounded-lg font-bold flex items-center gap-1 active:scale-95"><i data-lucide="download" class="w-3.5 h-3.5"></i> 导出库存</button>
-                </div>
-                
-                <div class="bg-blue-50 text-blue-700 p-3 rounded-xl text-[10px] font-medium border border-blue-100 mb-4 flex gap-2">
-                    <i data-lucide="info" class="w-4 h-4 shrink-0"></i>
-                    <p>系统已自动根据：<strong>盘点入库总数 － 出货总数</strong> 计算出实时存货。</p>
-                </div>
-
-                <div id="stock-container" class="space-y-3 pb-8">
-                    <!-- 动态生成库存列表 -->
+                    <button onclick="addRecord('dispatch')" class="w-full bg-amber-500 text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-95 transition-all">保存出货记录</button>
                 </div>
             </div>
 
-            <!-- ================== TAB 4: 条码数据库 ================== -->
-            <div id="tab-db" class="space-y-5 hidden">
-                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">
-                    <div class="flex justify-between items-center border-b pb-2"><h3 class="font-bold text-sm text-slate-800">登记新机油 (维护字典)</h3></div>
+            <!-- ================== TAB 3: 当前库存 (Balance) ================== -->
+            <div id="tab-balance" class="space-y-4 hidden h-full flex flex-col">
+                <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex-1 flex flex-col">
+                    <div class="flex justify-between items-center border-b pb-2 mb-3">
+                        <h3 class="font-bold text-sm text-slate-800 flex items-center gap-1"><i data-lucide="layers" class="w-4 h-4 text-indigo-500"></i> 实时库存结余</h3>
+                        <button onclick="exportBalanceCSV()" class="text-[10px] bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold px-2 py-1.5 rounded-lg transition-colors">导出报表</button>
+                    </div>
+                    <div id="balance-container" class="flex-1 overflow-y-auto no-scrollbar space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- ================== TAB 4: 记录 (Records) ================== -->
+            <div id="tab-records" class="space-y-4 hidden">
+                <!-- 入库记录 -->
+                <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-2">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h3 class="font-bold text-xs text-blue-600 flex items-center gap-1">➕ 入库明细 <span class="bg-blue-100 text-blue-700 text-[9px] px-1.5 rounded-full" id="count-recv">0</span></h3>
+                        <div class="flex gap-2">
+                            <button onclick="exportToCSV('receive')" class="text-[9px] text-blue-600 font-bold bg-blue-50 px-2 py-1 rounded">导出 SIRIM</button>
+                            <button onclick="clearRecordsByType('receive')" class="text-[9px] text-rose-500 font-bold border border-rose-100 px-2 py-1 rounded">清空</button>
+                        </div>
+                    </div>
+                    <div id="records-receive-container" class="space-y-2 max-h-[12rem] overflow-y-auto no-scrollbar"></div>
+                </div>
+
+                <!-- 出货记录 -->
+                <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-2">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h3 class="font-bold text-xs text-amber-600 flex items-center gap-1">➖ 出货明细 <span class="bg-amber-100 text-amber-700 text-[9px] px-1.5 rounded-full" id="count-disp">0</span></h3>
+                        <div class="flex gap-2">
+                            <button onclick="exportToCSV('dispatch')" class="text-[9px] text-amber-600 font-bold bg-amber-50 px-2 py-1 rounded">导出单据</button>
+                            <button onclick="clearRecordsByType('dispatch')" class="text-[9px] text-rose-500 font-bold border border-rose-100 px-2 py-1 rounded">清空</button>
+                        </div>
+                    </div>
+                    <div id="records-dispatch-container" class="space-y-2 max-h-[12rem] overflow-y-auto no-scrollbar"></div>
+                </div>
+            </div>
+
+            <!-- ================== TAB 5: 字典 (DB) ================== -->
+            <div id="tab-db" class="space-y-4 hidden">
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+                    <div class="flex justify-between items-center border-b pb-2"><h3 class="font-bold text-sm text-slate-800">登记新产品</h3></div>
                     <div class="space-y-3 text-xs">
-                        <div><label class="block font-bold text-slate-600 mb-1">Barcode (条形码号码)</label><input type="text" id="new-barcode" placeholder="例如: 8809680716964" class="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl font-semibold"></div>
+                        <div><label class="block font-bold text-slate-500 mb-1">Barcode (条形码号)</label><input type="text" id="new-barcode" placeholder="必填" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"></div>
                         <div class="grid grid-cols-2 gap-2">
-                            <div><label class="block font-bold text-slate-600 mb-1">Brand</label><input type="text" id="new-brand" value="S-OIL" class="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold"></div>
-                            <div><label class="block font-bold text-slate-600 mb-1">Rating</label><input type="text" id="new-rating" placeholder="例如: SAE 5W-30" class="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold"></div>
+                            <div><label class="block font-bold text-slate-500 mb-1">Brand</label><input type="text" id="new-brand" value="S-OIL" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"></div>
+                            <div><label class="block font-bold text-slate-500 mb-1">Rating</label><input type="text" id="new-rating" placeholder="例如: 5W-30" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"></div>
                         </div>
-                        <div><label class="block font-bold text-slate-600 mb-1">Product Code</label><input type="text" id="new-product-code" class="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold"></div>
-                        <div><label class="block font-bold text-slate-600 mb-1">Model (官方型号名称)</label><input type="text" id="new-model" class="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold"></div>
-                        <div><label class="block font-bold text-slate-600 mb-1">Type (类型)</label><select id="new-type" class="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold"><option value="SYNTHETIC">SYNTHETIC</option><option value="SEMI">SEMI</option><option value="MINERAL">MINERAL</option></select></div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><label class="block font-bold text-slate-500 mb-1">Product Code</label><input type="text" id="new-product-code" placeholder="例如: E108300" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"></div>
+                            <div><label class="block font-bold text-slate-500 mb-1">OLD NO (旧编号)</label><input type="text" id="new-old-no" placeholder="例如: 13521" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"></div>
+                        </div>
+                        <div><label class="block font-bold text-slate-500 mb-1">Model (官方型号)</label><input type="text" id="new-model" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"></div>
+                        <div><label class="block font-bold text-slate-500 mb-1">Type (类型)</label><select id="new-type" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"><option value="SYNTHETIC">SYNTHETIC</option><option value="SEMI">SEMI</option><option value="MINERAL">MINERAL</option></select></div>
                     </div>
-                    
-                    <div class="flex gap-2.5 pt-1">
-                        <button onclick="clearDBForm()" class="flex-[1] bg-slate-100 hover:bg-slate-200 text-slate-600 py-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-colors active:scale-95">
-                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i> 清空
-                        </button>
-                        <button onclick="addNewProduct()" class="flex-[2] bg-slate-850 hover:bg-slate-900 text-white py-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]">
-                            <i data-lucide="save" class="w-4 h-4"></i> 保存至本地字典
-                        </button>
+                    <div class="flex gap-2 pt-2">
+                        <button onclick="clearDBForm()" class="flex-1 bg-slate-100 text-slate-600 py-3 rounded-xl font-bold text-xs">清空</button>
+                        <button onclick="addNewProduct()" class="w-2/3 bg-slate-800 text-white py-3 rounded-xl font-bold text-xs shadow-md">保存至字典</button>
                     </div>
                 </div>
 
@@ -259,92 +406,251 @@
                     <div id="db-list" class="space-y-3 pb-10"></div>
                 </div>
             </div>
-
-            <!-- ================== TAB 5: 记录本 (整合盘点与出货) ================== -->
-            <div id="tab-records" class="space-y-5 hidden">
-                
-                <div class="bg-white p-4 rounded-3xl border border-blue-100 shadow-sm space-y-3">
-                    <div class="flex justify-between items-center border-b border-blue-50 pb-2">
-                        <div class="flex items-center gap-1.5 text-blue-700">
-                            <i data-lucide="clipboard-check" class="w-4 h-4"></i>
-                            <h3 class="font-bold text-sm">盘点入库记录 (Inbound)</h3>
-                            <span class="bg-blue-100 text-blue-700 text-[9px] font-black px-1.5 rounded-md" id="list-total-badge">0</span>
-                        </div>
-                        <button onclick="clearRecords('inventory')" class="text-[10px] text-slate-400 hover:text-rose-500 font-bold">清空</button>
-                    </div>
-                    <div id="records-container" class="space-y-2.5 max-h-[15rem] overflow-y-auto no-scrollbar"></div>
-                    <button onclick="exportToCSV('inventory')" class="w-full bg-blue-50 text-blue-600 py-2.5 rounded-xl font-bold text-[11px] active:scale-[0.98] transition-all flex justify-center gap-1.5"><i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> 导出入库 SIRIM CSV</button>
-                </div>
-
-                <div class="bg-white p-4 rounded-3xl border border-amber-100 shadow-sm space-y-3">
-                    <div class="flex justify-between items-center border-b border-amber-50 pb-2">
-                        <div class="flex items-center gap-1.5 text-amber-600">
-                            <i data-lucide="truck" class="w-4 h-4"></i>
-                            <h3 class="font-bold text-sm">日常出货记录 (Outbound)</h3>
-                            <span class="bg-amber-100 text-amber-700 text-[9px] font-black px-1.5 rounded-md" id="dispatch-total-badge">0</span>
-                        </div>
-                        <button onclick="clearRecords('dispatch')" class="text-[10px] text-slate-400 hover:text-rose-500 font-bold">清空</button>
-                    </div>
-                    <div id="dispatch-records-container" class="space-y-2.5 max-h-[15rem] overflow-y-auto no-scrollbar"></div>
-                    <button onclick="exportToCSV('dispatch')" class="w-full bg-amber-50 text-amber-600 py-2.5 rounded-xl font-bold text-[11px] active:scale-[0.98] transition-all flex justify-center gap-1.5"><i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> 导出出货明细 CSV</button>
-                </div>
-
-            </div>
         </main>
     </div>
 
-    <!-- Modals (Scanner, Export, Location, Confirm, Sync, EditTitle) -->
+    <!-- Modal 1: Scanner Modal -->
     <div id="scanner-modal" class="fixed inset-0 bg-slate-950/95 z-50 flex flex-col justify-between hidden">
         <div class="p-5 flex justify-between items-center text-white"><div><h3 class="font-bold text-base" id="scan-title">扫码</h3></div><button onclick="stopScanning()" class="bg-white/10 p-2.5 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button></div>
-        <div class="flex-1 flex items-center justify-center relative px-4"><div id="interactive" class="w-full max-w-sm aspect-[4/3] bg-slate-900 border-2 border-blue-500 overflow-hidden rounded-3xl relative"></div><div class="absolute w-[80%] max-w-[320px] h-[2px] bg-emerald-500 animate-bounce"></div></div>
+        <div class="flex-1 flex items-center justify-center relative px-4"><div id="interactive" class="w-full max-w-sm aspect-[4/3] bg-slate-900 border-2 border-blue-500 overflow-hidden rounded-3xl relative"></div></div>
     </div>
     
+    <!-- Modal 2: CSV Export Preview -->
     <div id="export-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center px-4 hidden">
-        <div class="bg-white rounded-[2rem] max-w-sm w-full p-6 shadow-2xl space-y-4 border border-slate-100 flex flex-col max-h-[90vh]">
-            <div class="flex justify-between items-center pb-2 border-b"><div class="flex items-center gap-2 text-emerald-600"><i data-lucide="file-spreadsheet" class="w-5 h-5"></i><h4 class="font-bold text-slate-800 text-base" id="export-modal-title">数据导出助手</h4></div><button onclick="closeExportModal()"><i data-lucide="x" class="w-5 h-5"></i></button></div>
-            <div class="flex-1 min-h-[8rem] bg-slate-950 rounded-2xl p-3 font-mono text-[9px] text-emerald-400 overflow-auto no-scrollbar"><pre id="csv-preview-area" class="whitespace-pre-wrap"></pre></div>
-            <div class="space-y-2 pt-2"><button onclick="triggerActualDownload()" class="w-full bg-blue-600 text-white py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5"><i data-lucide="download" class="w-4 h-4"></i> 下载 CSV 文件</button><button onclick="copyCSVToClipboard()" class="w-full bg-slate-900 text-white py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5"><i data-lucide="copy" class="w-4 h-4"></i> 复制表格文本</button></div>
+        <div class="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl flex flex-col max-h-[85vh]">
+            <div class="flex justify-between items-center pb-2 border-b mb-3"><h4 class="font-bold text-slate-800 text-sm">导出预览</h4><button onclick="closeExportModal()"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+            <div class="flex-1 min-h-[6rem] bg-slate-950 rounded-xl p-3 font-mono text-[8px] text-emerald-400 overflow-auto no-scrollbar mb-3"><pre id="csv-preview-area" class="whitespace-pre-wrap"></pre></div>
+            <div class="space-y-2"><button onclick="triggerActualDownload()" class="w-full bg-blue-600 text-white py-2.5 rounded-lg text-xs font-bold">下载 CSV 文件</button><button onclick="copyCSVToClipboard()" class="w-full bg-slate-100 text-slate-700 py-2.5 rounded-lg text-xs font-bold">复制表格文本</button></div>
         </div>
     </div>
 
+    <!-- Modal 3: Location Manager -->
     <div id="location-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center px-4 hidden">
-        <div class="bg-white rounded-[2rem] max-w-sm w-full p-6 shadow-2xl space-y-4 flex flex-col max-h-[80vh]">
-            <div class="flex justify-between items-center pb-2 border-b"><div class="flex items-center gap-2 text-blue-600"><i data-lucide="map-pinned" class="w-5 h-5"></i><h4 class="font-bold text-slate-800 text-base">库存地点管理</h4></div><button onclick="closeLocationManager()"><i data-lucide="x" class="w-5 h-5"></i></button></div>
-            <div class="space-y-2"><label class="block text-[11px] font-bold text-slate-500">添加新地点</label><div class="flex gap-2"><input type="text" id="new-location-input" class="flex-1 px-3 py-2.5 bg-slate-50 border rounded-xl text-xs font-bold"><button onclick="addNewLocation()" class="bg-blue-600 text-white px-4 rounded-xl text-xs font-bold">添加</button></div></div>
-            <div class="space-y-2"><label class="block text-[11px] font-bold text-slate-500">现有地点</label><div id="location-list-container" class="space-y-2 max-h-[25vh] overflow-y-auto no-scrollbar"></div></div>
+        <div class="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-2"><h4 class="font-bold text-sm">库存地点管理</h4><button onclick="closeLocationManager()"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+            <div class="flex gap-2"><input type="text" id="new-location-input" class="flex-1 px-3 py-2 bg-slate-50 border rounded-lg text-xs"><button onclick="addNewLocation()" class="bg-blue-600 text-white px-3 rounded-lg text-xs font-bold">添加</button></div>
+            <div id="location-list-container" class="space-y-2 max-h-[30vh] overflow-y-auto no-scrollbar"></div>
         </div>
     </div>
 
+    <!-- Modal 4: Dictionary Sync Manager -->
     <div id="sync-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center px-4 hidden">
         <div class="bg-white rounded-[2rem] max-w-sm w-full p-6 shadow-2xl space-y-4 flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center pb-2 border-b">
-                <div class="flex items-center gap-2 text-blue-600"><i data-lucide="database" class="w-5 h-5"></i><h4 class="font-bold text-slate-800 text-base">字典数据同步助手</h4></div>
+                <div class="flex items-center gap-2 text-blue-600"><i data-lucide="database" class="w-5 h-5"></i><h4 class="font-bold text-slate-800 text-base">字典数据同步</h4></div>
                 <button onclick="closeSyncModal()"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <div class="space-y-4 pt-1 text-xs overflow-y-auto no-scrollbar">
                 <div class="space-y-2">
                     <label class="block text-[11px] font-bold text-slate-500">方式一：导出/导入为本地文件</label>
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="exportDBFile()" class="bg-blue-50 hover:bg-blue-100 text-blue-600 py-3 rounded-xl font-bold flex flex-col items-center gap-1 transition-colors"><i data-lucide="download-cloud" class="w-5 h-5"></i> 导出备份 (JSON)</button>
-                        <button onclick="triggerImportDB()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-600 py-3 rounded-xl font-bold flex flex-col items-center gap-1 transition-colors"><i data-lucide="upload-cloud" class="w-5 h-5"></i> 导入备份 (JSON)</button>
+                        <button onclick="exportDBFile()" class="bg-blue-50 hover:bg-blue-100 text-blue-600 py-3 rounded-xl font-bold flex flex-col items-center gap-1"><i data-lucide="download-cloud" class="w-5 h-5"></i> 导出备份 (JSON)</button>
+                        <button onclick="triggerImportDB()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-600 py-3 rounded-xl font-bold flex flex-col items-center gap-1"><i data-lucide="upload-cloud" class="w-5 h-5"></i> 导入备份 (JSON)</button>
                         <input type="file" id="import-db-file" accept=".json" class="hidden" onchange="importDBFromFile(event)">
-                        <button onclick="exportDBCSV()" class="col-span-2 bg-slate-50 border hover:bg-slate-100 text-slate-700 py-3 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-colors"><i data-lucide="file-spreadsheet" class="w-4 h-4"></i> 导出为 Excel 表格 (CSV)</button>
+                        <button onclick="exportDBCSV()" class="col-span-2 bg-slate-50 border hover:bg-slate-100 text-slate-700 py-3 rounded-xl font-bold flex items-center justify-center gap-1.5"><i data-lucide="file-spreadsheet" class="w-4 h-4"></i> 导出为 Excel 表格</button>
                     </div>
                 </div>
-                <div class="relative py-1"><div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div><div class="relative flex justify-center"><span class="bg-white px-2 text-[10px] text-slate-400 font-bold">方式二：通过复制文本无缝同步</span></div></div>
                 <div class="space-y-2">
-                    <textarea id="sync-code-area" placeholder="在此粘贴从同事手机复制过来的字典代码..." class="w-full h-20 p-3 bg-slate-50 border border-slate-200 rounded-xl text-[10px] font-mono text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    <label class="block text-[11px] font-bold text-slate-500">方式二：通过文本无缝同步</label>
+                    <textarea id="sync-code-area" placeholder="粘贴从同事手机复制的字典代码..." class="w-full h-20 p-3 bg-slate-50 border border-slate-200 rounded-xl text-[10px] font-mono"></textarea>
                     <div class="flex gap-2">
                         <button onclick="copyDBCode()" class="flex-1 bg-slate-800 text-white py-2.5 rounded-lg font-bold flex justify-center items-center gap-1"><i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制我的代码</button>
                         <button onclick="importDBFromCode()" class="flex-1 bg-emerald-600 text-white py-2.5 rounded-lg font-bold flex justify-center items-center gap-1"><i data-lucide="clipboard-paste" class="w-3.5 h-3.5"></i> 粘贴并合并</button>
                     </div>
                 </div>
-                <div class="pt-3 border-t flex justify-between items-center"><span class="text-[10px] text-slate-400 font-semibold">系统内置了标准库</span><button onclick="resetDefaultDB()" class="text-[10px] text-rose-500 font-bold bg-rose-50 px-2 py-1 rounded-lg">恢复初始S-OIL库</button></div>
+                <div class="pt-3 border-t flex justify-between items-center">
+                     <span class="text-[10px] text-slate-400 font-semibold">系统内置了标准库</span>
+                     <button onclick="resetDefaultDB()" class="text-[10px] text-rose-500 font-bold bg-rose-50 px-2 py-1 rounded-lg">恢复初始S-OIL库</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- 确认弹窗 -->
+    <!-- Modal 5: Price & Discount Settings (WITH OLD NO & ADD PRODUCT FEATURE) -->
+    <div id="pricing-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center px-4 hidden">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center pb-2 border-b mb-2">
+                <h4 class="font-bold text-slate-800 text-sm flex items-center gap-1"><i data-lucide="circle-dollar-sign" class="w-4 h-4 text-emerald-600"></i> 价格与折扣表设置</h4>
+                <div class="flex items-center gap-2">
+                    <button onclick="openPricingSyncModal()" class="text-[10px] text-emerald-700 font-bold bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors active:scale-95 border border-emerald-200">
+                        <i data-lucide="refresh-cw" class="w-3 h-3"></i> 备份与同步
+                    </button>
+                    <button onclick="closePricingModal()"><i data-lucide="x" class="w-4 h-4 text-slate-400 hover:text-slate-700"></i></button>
+                </div>
+            </div>
+            <p class="text-[10px] text-slate-500 mb-2">在此设置每款机油的默认单价 (Unit Price)、OLD NO (旧编号)、官方折扣 (Discount) 和积分 (Points)。开单时将自动带入。</p>
+            
+            <!-- ADD NEW PRODUCT PRICE DIRECTLY IN THIS MODAL -->
+            <div class="bg-emerald-50/70 border border-emerald-200 p-3 rounded-2xl mb-3 space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-[11px] font-black text-emerald-900 flex items-center gap-1"><i data-lucide="plus-circle" class="w-3.5 h-3.5 text-emerald-600"></i> ➕ 手动新增产品价格条目</span>
+                    <button onclick="togglePricingAddForm()" class="text-[10px] font-bold text-emerald-700 underline" id="btn-toggle-price-add">展开新增</button>
+                </div>
+                <div id="pricing-add-form" class="hidden space-y-2 pt-1 border-t border-emerald-200/60">
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-600 block">Product Code*</label>
+                            <input type="text" id="add-price-code" placeholder="如 E108300" class="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-indigo-900">
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-600 block">OLD NO (旧编号)</label>
+                            <input type="text" id="add-price-old-no" placeholder="如 13521" class="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-amber-700">
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-600 block">Rating (粘度)</label>
+                            <input type="text" id="add-price-rating" placeholder="如 5W-30" class="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-bold text-slate-600 block">Model 名称 (完整规格)*</label>
+                        <input type="text" id="add-price-model" placeholder="如 S-OIL 7 RED #9 SP 5W-30" class="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold">
+                    </div>
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-600 block">Price (RM)</label>
+                            <input type="number" id="add-price-val" placeholder="0.00" class="w-full px-1.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-indigo-700">
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-600 block">Disc (RM)</label>
+                            <input type="number" id="add-price-disc" placeholder="0.00" class="w-full px-1.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-rose-600">
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-600 block">Points</label>
+                            <input type="number" id="add-price-pts" placeholder="0" class="w-full px-1.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-emerald-700">
+                        </div>
+                    </div>
+                    <button onclick="addNewPricingProduct()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-xl text-xs font-extrabold shadow-sm active:scale-95 transition-all">确认添加该产品价格</button>
+                </div>
+            </div>
+
+            <!-- Existing Products Pricing List -->
+            <div id="pricing-list" class="flex-1 overflow-y-auto no-scrollbar space-y-2 pb-2">
+                <!-- Dynamically generated -->
+            </div>
+            <div class="pt-2 border-t border-slate-100">
+                <button onclick="closePricingModal()" class="w-full bg-emerald-600 text-white py-3 rounded-xl text-xs font-bold active:scale-95 transition-all">保存设置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 5.5: Pricing Backup & Sync Modal -->
+    <div id="pricing-sync-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center px-4 hidden">
+        <div class="bg-white rounded-[2rem] max-w-sm w-full p-6 shadow-2xl space-y-4 flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center pb-2 border-b">
+                <div class="flex items-center gap-2 text-emerald-600">
+                    <i data-lucide="circle-dollar-sign" class="w-5 h-5"></i>
+                    <h4 class="font-bold text-slate-800 text-base">价格与折扣 备份与同步</h4>
+                </div>
+                <button onclick="closePricingSyncModal()"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
+            </div>
+            <div class="space-y-4 pt-1 text-xs overflow-y-auto no-scrollbar">
+                <div class="space-y-2">
+                    <label class="block text-[11px] font-bold text-slate-500">方式一：备份文件 (JSON)</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="exportPricingFile()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 py-2.5 rounded-xl font-bold flex items-center justify-center gap-1 border border-emerald-100"><i data-lucide="download-cloud" class="w-4 h-4"></i> 导出备份 (JSON)</button>
+                        <button onclick="triggerImportPricing()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 py-2.5 rounded-xl font-bold flex items-center justify-center gap-1 border border-blue-100"><i data-lucide="upload-cloud" class="w-4 h-4"></i> 导入备份 (JSON)</button>
+                        <input type="file" id="import-pricing-file" accept=".json" class="hidden" onchange="importPricingFromFile(event)">
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-[11px] font-bold text-slate-500">方式二：Excel 表格 (CSV) 导入与导出</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="exportPricingCSV()" class="bg-slate-50 border hover:bg-slate-100 text-slate-700 py-2.5 rounded-xl font-bold flex items-center justify-center gap-1"><i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600"></i> 导出 Excel (CSV)</button>
+                        <button onclick="triggerImportPricingCSV()" class="bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-800 py-2.5 rounded-xl font-bold flex items-center justify-center gap-1"><i data-lucide="file-up" class="w-4 h-4 text-emerald-600"></i> 导入 Excel (CSV)</button>
+                        <input type="file" id="import-pricing-csv-file" accept=".csv,.txt" class="hidden" onchange="importPricingFromCSVFile(event)">
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-[11px] font-bold text-slate-500">方式三：通过文本无缝同步价格表</label>
+                    <textarea id="pricing-sync-code-area" placeholder="粘贴同事分享的价格与折扣同步代码..." class="w-full h-20 p-3 bg-slate-50 border border-slate-200 rounded-xl text-[10px] font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+                    <div class="flex gap-2">
+                        <button onclick="copyPricingCode()" class="flex-1 bg-slate-800 text-white py-2.5 rounded-lg font-bold flex justify-center items-center gap-1"><i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制价格代码</button>
+                        <button onclick="importPricingFromCode()" class="flex-1 bg-emerald-600 text-white py-2.5 rounded-lg font-bold flex justify-center items-center gap-1"><i data-lucide="clipboard-paste" class="w-3.5 h-3.5"></i> 粘贴并应用</button>
+                    </div>
+                </div>
+                <div class="pt-3 border-t flex justify-between items-center">
+                     <span class="text-[10px] text-slate-400 font-semibold">重置默认价格</span>
+                     <button onclick="resetDefaultPricing()" class="text-[10px] text-rose-500 font-bold bg-rose-50 hover:bg-rose-100 px-2.5 py-1 rounded-lg border border-rose-100">恢复出厂默认价格</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 6: Customer Name Management & Sync Modal -->
+    <div id="customer-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center px-4 hidden">
+        <div class="bg-white rounded-[2rem] max-w-sm w-full p-6 shadow-2xl space-y-4 flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center pb-2 border-b">
+                <div class="flex items-center gap-2 text-indigo-600">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    <h4 class="font-bold text-slate-800 text-base">客户名单 管理与同步</h4>
+                </div>
+                <button onclick="closeCustomerModal()"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
+            </div>
+            
+            <!-- Add New Customer Input -->
+            <div class="space-y-1.5">
+                <label class="block text-[11px] font-bold text-slate-600">新增客户名字 (Add Customer)</label>
+                <div class="flex gap-2">
+                    <input type="text" id="new-customer-name-input" placeholder="输入客户或车行名字..." class="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <button onclick="addNewCustomerFromModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold active:scale-95 transition-all">添加</button>
+                </div>
+            </div>
+
+            <!-- Customer List Box -->
+            <div class="space-y-1.5 flex-1 overflow-hidden flex flex-col min-h-[10rem]">
+                <div class="flex justify-between items-center">
+                    <label class="block text-[11px] font-bold text-slate-600">已有客户清单 (<span id="customer-count-badge">0</span>)</label>
+                </div>
+                <div id="customer-list-container" class="flex-1 overflow-y-auto no-scrollbar space-y-1.5 border border-slate-100 p-2 rounded-2xl bg-slate-50/50">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <!-- Backup & Sync Section -->
+            <div class="space-y-2 pt-2 border-t border-slate-100">
+                <label class="block text-[11px] font-bold text-indigo-700 flex items-center gap-1">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> 客户数据 备份与同步
+                </label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="exportCustomerFile()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1 border border-indigo-100"><i data-lucide="download-cloud" class="w-4 h-4"></i> 导出备份 (JSON)</button>
+                    <button onclick="triggerImportCustomer()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1 border border-emerald-100"><i data-lucide="upload-cloud" class="w-4 h-4"></i> 导入备份 (JSON)</button>
+                    <input type="file" id="import-customer-file" accept=".json" class="hidden" onchange="importCustomerFromFile(event)">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="exportCustomerCSV()" class="bg-slate-50 hover:bg-slate-100 text-slate-700 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1 border border-slate-200"><i data-lucide="file-spreadsheet" class="w-4 h-4 text-indigo-600"></i> 导出 Excel (CSV)</button>
+                    <button onclick="triggerImportCustomerCSV()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1 border border-indigo-200"><i data-lucide="file-up" class="w-4 h-4 text-indigo-600"></i> 导入 Excel (CSV)</button>
+                    <input type="file" id="import-customer-csv-file" accept=".csv,.txt" class="hidden" onchange="importCustomerFromCSVFile(event)">
+                </div>
+                
+                <div class="space-y-1.5 pt-1">
+                    <textarea id="customer-sync-code-area" placeholder="粘贴复制的客户名单同步代码..." class="w-full h-16 p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[10px] font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                    <div class="flex gap-2">
+                        <button onclick="copyCustomerCode()" class="flex-1 bg-slate-800 text-white py-2 rounded-lg font-bold text-xs flex justify-center items-center gap-1"><i data-lucide="copy" class="w-3 h-3"></i> 复制客户代码</button>
+                        <button onclick="importCustomerFromCode()" class="flex-1 bg-indigo-600 text-white py-2 rounded-lg font-bold text-xs flex justify-center items-center gap-1"><i data-lucide="clipboard-paste" class="w-3 h-3"></i> 粘贴并合并</button>
+                    </div>
+                </div>
+
+                <div class="pt-1 flex justify-between items-center">
+                    <span class="text-[9px] text-slate-400 font-semibold">恢复默认客户</span>
+                    <button onclick="resetDefaultCustomers()" class="text-[9px] text-rose-500 font-bold bg-rose-50 hover:bg-rose-100 px-2 py-0.5 rounded-md border border-rose-100">恢复出厂列表</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 7: Edit App Title Modal -->
+    <div id="app-name-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center px-4 hidden">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl space-y-3">
+            <h4 class="font-bold text-slate-800 text-sm">自定义系统标题名称</h4>
+            <input type="text" id="app-name-input" placeholder="输入新的系统名字..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <div class="flex gap-2 pt-1">
+                <button onclick="closeAppNameModal()" class="flex-1 bg-slate-100 text-slate-600 py-2 rounded-xl text-xs font-bold">取消</button>
+                <button onclick="saveAppName()" class="flex-1 bg-indigo-600 text-white py-2 rounded-xl text-xs font-bold">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 8: Safe Confirm Modal -->
     <div id="confirm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center px-4 hidden">
         <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl">
             <h4 class="font-bold text-slate-800 text-base mb-2" id="confirm-title">确认</h4>
@@ -356,336 +662,1215 @@
         </div>
     </div>
 
-    <!-- 标题修改弹窗 -->
-    <div id="edit-title-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center px-4 hidden">
-        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl">
-            <h4 class="font-bold text-slate-800 text-base mb-2">修改系统名称</h4>
-            <p class="text-[11px] text-slate-500 mb-4">请输入新的仓库或系统名称：</p>
-            <input type="text" id="new-title-input" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-5" placeholder="例如: S-OIL 智能管库">
-            <div class="flex gap-2.5 justify-end">
-                <button onclick="closeEditTitleModal()" class="flex-1 px-4 py-3 bg-slate-50 border text-slate-600 rounded-xl text-xs font-bold">取消</button>
-                <button onclick="saveAppTitle()" class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl text-xs font-bold shadow-md">保存</button>
-            </div>
-        </div>
-    </div>
-
     <script>
+        // ================== DATABASES & GLOBAL STATE ==================
+        
         const defaultProducts = {
-            "8809680716964": { brand: "S-OIL", model: "S-OIL SEVEN RED #7 SP 5W-30 (4LX4)", type: "SYNTHETIC", rating: "SAE 5W-30", productCode: "E108300", batchNumber: "8809680716964" },
-            "8809680711013": { brand: "S-OIL", model: "S-OIL 7 RED #7 SN 15W-40 (4LX4)", type: "SEMI", rating: "SAE 15W-40", productCode: "8809680711013", batchNumber: "8809680711013" },
-            "8809680712041": { brand: "S-OIL", model: "S-OIL 7 RED #7 SN 15W-40 (4LX4)", type: "SEMI", rating: "SAE 15W 40", productCode: "8809680 712041", batchNumber: "8809680712041" }
+            "8809680716964": { brand: "S-OIL", model: "S-OIL SEVEN RED #7 SP 5W-30 (4LX4)", type: "SYNTHETIC", rating: "SAE 5W-30", productCode: "E108300", oldNo: "13521", batchNumber: "8809680716964", price: "552.00", discount: "20.00", points: "50" },
+            "8809680711013": { brand: "S-OIL", model: "S-OIL 7 RED #7 SN 15W-40 (4LX4)", type: "SEMI", rating: "SAE 15W-40", productCode: "E107692", oldNo: "13121", batchNumber: "8809680711013", price: "420.00", discount: "10.00", points: "0" },
+            "8809680716896": { brand: "S-OIL", model: "S-OIL 7 RED #9 SP 5W-30 (1LX12)", type: "SYNTHETIC", rating: "SAE 5W-30", productCode: "E108295", oldNo: "13841", batchNumber: "8809680716896", price: "576.00", discount: "0.00", points: "20" },
+            "E108280": { brand: "S-OIL", model: "S-OIL 7 RED #9 SP 0W-20 (4LX4)", type: "SYNTHETIC", rating: "SAE 0W-20", productCode: "E108280", oldNo: "14361", batchNumber: "E108280", price: "660.00", discount: "20.00", points: "50" },
+            "E108304": { brand: "S-OIL", model: "S-OIL 7 RED #9 SP 5W-40 (4LX4)", type: "SYNTHETIC", rating: "SAE 5W-40", productCode: "E108304", oldNo: "13961", batchNumber: "E108304", price: "720.00", discount: "10.00", points: "70" }
         };
-        const defaultLocations = ["GREATOCEAN AUTOMOBILE SUPPLY SDN BHD", "Aramco Lub Marketing"];
-        
-        let productDB = JSON.parse(localStorage.getItem('sirim_product_db_v2')) || defaultProducts;
-        let records = JSON.parse(localStorage.getItem('sirim_records_v4')) || [];
-        let dispatchRecords = JSON.parse(localStorage.getItem('sirim_dispatch_records_v1')) || [];
-        let locationsDB = JSON.parse(localStorage.getItem('sirim_locations_v2')) || defaultLocations;
-        let lastSelectedLocation = localStorage.getItem('sirim_last_location_v2') || locationsDB[0];
-        
-        let html5QrcodeScanner = null, activeProduct = null, confirmCallback = null, generatedCSVData = "", currentExportType = "";
 
-        // --- 初始化载入 ---
-        window.onload = function() { 
-            lucide.createIcons(); 
-            updateUIRecords(); 
-            updateUIDB(); 
-            updateUILocations(); 
-            setupConfirmHandlers(); 
-            document.getElementById('disp-date').valueAsDate = new Date(); 
+        const defaultCustomers = [
+            "IPOH AUTO SERVICE SDN. BHD.",
+            "NEW AGE AUTO",
+            "K MANI ACCESSORIES SDN BHD",
+            "TOP RACING MOTOR SPARE PARTS TRADING",
+            "ALAT GANTI KERETA HT",
+            "DA XIAN FENG AUTO PARTS",
+            "EU FOONG AUTO SERVICE",
+            "EXPRESSWAY TAYAR & SERVIS SDN BHD",
+            "GREATOCEAN AUTOMOBILE SUPPLY SDN BHD",
+            "QCARE AUTO SDN BHD",
+            "RIZMA AUTO SERVICES SDN BHD",
+            "SYARIKAT TAYAR DAN BATERI USAHA JAYA",
+            "WORKSHOP A",
+            "WORKSHOP B"
+        ];
+
+        const defaultLocations = ["Warehouse A", "Main Store"];
+
+        // Local Storage Hydration
+        let productDB = JSON.parse(localStorage.getItem('soil_db_v5')) || defaultProducts;
+        let customerDatabase = JSON.parse(localStorage.getItem('soil_cust_v1')) || defaultCustomers;
+        let records = JSON.parse(localStorage.getItem('soil_rec_v5')) || [];
+        let dispatchRecords = JSON.parse(localStorage.getItem('soil_dispatch_v1')) || [];
+        let orderCart = [];
+        let locationsDB = JSON.parse(localStorage.getItem('soil_loc_v2')) || defaultLocations;
+        let lastSelectedLocation = localStorage.getItem('soil_lastloc_v2') || locationsDB[0];
+        let appName = localStorage.getItem('soil_app_name') || 'S-OIL 智能管库';
+
+        let html5QrcodeScanner = null;
+        let activeProduct = null;
+        let scanMode = 'receive';
+        let confirmCallback = null;
+        let generatedCSVData = "";
+
+        window.onload = function() {
+            lucide.createIcons();
+            document.getElementById('app-title-display').innerText = appName;
             
-            document.getElementById('manual-barcode').addEventListener('keypress', function(e){
-                if(e.key === 'Enter') lookupBarcode();
-            });
+            // Populate customer dropdown in Order Hub
+            initCustomerDropdown();
+            
+            // Populate Product dropdown in Order Hub
+            initOrderProductDropdown();
 
-            // 初始化系统名称
-            let savedTitle = localStorage.getItem('sirim_app_title_v1') || "S-OIL 智能管库";
-            document.getElementById('app-main-title').innerText = savedTitle;
+            // Set today's date in dispatch
+            document.getElementById('dispatch-date').valueAsDate = new Date();
+
+            updateUIRecords();
+            updateUIDB();
+            updateUILocations();
+            renderBalance();
+            setupConfirmHandlers();
         };
 
-        // --- 系统名称修改逻辑 ---
-        function openEditTitleModal() {
-            document.getElementById('new-title-input').value = document.getElementById('app-main-title').innerText;
-            document.getElementById('edit-title-modal').classList.remove('hidden');
-            setTimeout(() => document.getElementById('new-title-input').focus(), 100);
+        // --- APP TITLE CUSTOMIZATION ---
+        function editAppName() {
+            document.getElementById('app-name-input').value = appName;
+            document.getElementById('app-name-modal').classList.remove('hidden');
         }
-        function closeEditTitleModal() { document.getElementById('edit-title-modal').classList.add('hidden'); }
-        function saveAppTitle() {
-            const newTitle = document.getElementById('new-title-input').value.trim();
-            if(newTitle) {
-                localStorage.setItem('sirim_app_title_v1', newTitle);
-                document.getElementById('app-main-title').innerText = newTitle;
-                showToast("系统名称已更新！");
-                closeEditTitleModal();
+        function closeAppNameModal() { document.getElementById('app-name-modal').classList.add('hidden'); }
+        function saveAppName() {
+            const val = document.getElementById('app-name-input').value.trim();
+            if(val) {
+                appName = val;
+                localStorage.setItem('soil_app_name', appName);
+                document.getElementById('app-title-display').innerText = appName;
+                showToast("✅ 系统标题改写成功");
+            }
+            closeAppNameModal();
+        }
+
+        // ================== ORDER HUB LOGIC ==================
+        function initCustomerDropdown() {
+            const selectEl = document.getElementById('order-customer');
+            const currentVal = selectEl.value;
+            selectEl.innerHTML = '<option value="">-- 选择客户名字 (Customer) --</option>' + 
+                customerDatabase.slice().sort().map(c => `<option value="${c}" ${c === currentVal ? 'selected' : ''}>${c}</option>`).join('');
+        }
+
+        function initOrderProductDropdown() {
+            const prodSelect = document.getElementById('order-product-select');
+            prodSelect.innerHTML = '<option value="">-- 点击选择产品型号或代码 --</option>' +
+                Object.keys(productDB).map(k => {
+                    const p = productDB[k];
+                    return `<option value="${k}">${p.productCode || k} ${p.oldNo ? `[OLD: ${p.oldNo}]` : ''} - ${p.brand} ${p.rating} (${p.model})</option>`;
+                }).join('');
+        }
+
+        function lookupProductForOrder(code) {
+            if(!code) return;
+            let p = productDB[code];
+            if(!p) {
+                const key = Object.keys(productDB).find(k => productDB[k].productCode === code);
+                if(key) p = productDB[key];
+            }
+
+            if(p) {
+                document.getElementById('order-code').value = p.productCode || code;
+                document.getElementById('order-old-no').value = p.oldNo || "";
+                document.getElementById('order-product-desc').value = `${p.model}\n${p.brand} ${p.rating}`;
+                document.getElementById('order-batch').value = p.batchNumber || code;
+                
+                // Fill price automation from DB
+                document.getElementById('order-price').value = p.price || "0.00";
+                document.getElementById('order-discount').value = p.discount || "0.00";
+                document.getElementById('order-points').value = p.points || "0";
+                document.getElementById('order-qty').value = "1";
+                
+                activeProduct = { barcode: code, ...p };
+                calculateNet();
+                showToast("✅ 对应单价、旧编号、折扣与积分已自动填入！");
             } else {
-                showToast("名称不能为空", "error");
+                showToast("❌ 未找到该产品，请在字典或价格表中添加", "error");
             }
         }
 
-        // --- UI 和确认弹窗处理 ---
-        function updateUILocations() {
-            document.getElementById('input-location').innerHTML = locationsDB.map(loc => `<option value="${loc}" ${loc === lastSelectedLocation ? 'selected' : ''}>${loc}</option>`).join('');
-            document.getElementById('location-list-container').innerHTML = locationsDB.map(loc => `<div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl text-xs"><span class="font-bold flex-1 ${loc === lastSelectedLocation ? 'text-blue-600' : 'text-slate-700'}">${loc}</span><div class="flex items-center gap-1">${loc !== lastSelectedLocation ? `<button onclick="setAsDefaultLocation('${loc}')" class="text-[10px] bg-white border px-2 py-1 rounded-lg">默认</button>` : ''}<button onclick="deleteLocation('${loc}')" class="text-slate-300 hover:text-rose-500 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button></div></div>`).join('');
+        function calculateNet() {
+            const qty = parseFloat(document.getElementById('order-qty').value) || 0;
+            const price = parseFloat(document.getElementById('order-price').value) || 0;
+            const discount = parseFloat(document.getElementById('order-discount').value) || 0;
+            const ptsPerCtn = parseFloat(document.getElementById('order-points').value) || 0;
+
+            const netUnit = Math.max(0, price - discount);
+            document.getElementById('order-net-price').value = netUnit.toFixed(2);
+            document.getElementById('order-total-points').value = Math.round(qty * ptsPerCtn);
+        }
+
+        function addOrderLineItem() {
+            if(!activeProduct) return showToast("请先选择或扫描一个产品", "error");
+            const customer = document.getElementById('order-customer').value;
+            if(!customer) return showToast("请选择客户 (Customer Name)", "error");
+            
+            const qty = parseFloat(document.getElementById('order-qty').value);
+            if(!qty || qty <= 0) return showToast("请输入发货数量 Quantity", "error");
+
+            const item = {
+                id: Date.now(),
+                customer: customer,
+                code: document.getElementById('order-code').value,
+                desc: document.getElementById('order-product-desc').value.replace('\n', ' | '),
+                batch: document.getElementById('order-batch').value,
+                oldNo: document.getElementById('order-old-no').value,
+                qty: qty,
+                price: parseFloat(document.getElementById('order-price').value) || 0,
+                discount: parseFloat(document.getElementById('order-discount').value) || 0,
+                netUnit: parseFloat(document.getElementById('order-net-price').value) || 0,
+                totalNet: (parseFloat(document.getElementById('order-net-price').value) || 0) * qty,
+                points: parseInt(document.getElementById('order-total-points').value) || 0
+            };
+
+            orderCart.push(item);
+            renderOrderCart();
+
+            // Reset selection fields for next item
+            document.getElementById('order-product-select').value = "";
+            document.getElementById('order-code').value = "";
+            document.getElementById('order-old-no').value = "";
+            document.getElementById('order-product-desc').value = "";
+            document.getElementById('order-batch').value = "";
+            document.getElementById('order-qty').value = "1";
+            document.getElementById('order-price').value = "";
+            document.getElementById('order-discount').value = "";
+            document.getElementById('order-net-price').value = "";
+            document.getElementById('order-points').value = "";
+            document.getElementById('order-total-points').value = "";
+            activeProduct = null;
+
+            showToast("✅ 已追加进当前订单明细");
+        }
+
+        function removeCartItem(id) {
+            orderCart = orderCart.filter(i => i.id !== id);
+            renderOrderCart();
+        }
+
+        function renderOrderCart() {
+            const container = document.getElementById('order-cart-list');
+            const summaryBox = document.getElementById('order-summary-box');
+            document.getElementById('order-cart-count').innerText = `${orderCart.length} 项`;
+
+            if(orderCart.length === 0) {
+                container.innerHTML = '<div class="text-center text-slate-400 text-xs py-4">订单暂存区为空，请先在上方录入项目</div>';
+                summaryBox.classList.add('hidden');
+                return;
+            }
+
+            let totalNet = 0;
+            let totalPts = 0;
+
+            container.innerHTML = orderCart.map((item) => {
+                totalNet += item.totalNet;
+                totalPts += item.points;
+                return `
+                <div class="bg-indigo-50/50 border border-indigo-100 p-2.5 rounded-xl text-xs flex justify-between items-center">
+                    <div class="space-y-0.5 flex-1 pr-2">
+                        <div class="font-extrabold text-indigo-900">${item.desc}</div>
+                        <div class="text-[10px] text-slate-500">Code: <b class="text-indigo-700">${item.code}</b> ${item.oldNo ? `| OLD: <b class="text-amber-700">${item.oldNo}</b>` : ''} | Batch: ${item.batch}</div>
+                        <div class="text-[10px] text-slate-600 flex gap-2 pt-0.5">
+                            <span>数量: <b class="text-indigo-800">${item.qty} CTN</b></span>
+                            <span>单价: RM${item.netUnit.toFixed(2)}</span>
+                            <span class="text-rose-600 font-bold">小计: RM${item.totalNet.toFixed(2)}</span>
+                        </div>
+                    </div>
+                    <button onclick="removeCartItem(${item.id})" class="text-slate-300 hover:text-rose-500 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>`;
+            }).join('');
+
+            document.getElementById('order-total-net').innerText = `RM ${totalNet.toFixed(2)}`;
+            document.getElementById('order-total-pts').innerText = `${totalPts} Pts`;
+            summaryBox.classList.remove('hidden');
             lucide.createIcons();
         }
-        function openLocationManager() { document.getElementById('location-modal').classList.remove('hidden'); lucide.createIcons(); }
-        function closeLocationManager() { document.getElementById('location-modal').classList.add('hidden'); }
-        function addNewLocation() {
-            const val = document.getElementById('new-location-input').value.trim();
-            if(!val || locationsDB.includes(val)) return;
-            locationsDB.push(val); lastSelectedLocation = val;
-            localStorage.setItem('sirim_locations_v2', JSON.stringify(locationsDB)); localStorage.setItem('sirim_last_location_v2', val);
-            document.getElementById('new-location-input').value = ""; updateUILocations(); showToast("✅ 添加成功");
+
+        function saveFinalOrder() {
+            if(orderCart.length === 0) return;
+            const orderDoc = {
+                id: Date.now(),
+                date: new Date().toISOString().slice(0, 10),
+                customer: orderCart[0].customer,
+                items: orderCart,
+                totalNet: orderCart.reduce((sum, item) => sum + item.totalNet, 0),
+                totalPoints: orderCart.reduce((sum, item) => sum + item.points, 0)
+            };
+
+            orderCart.forEach(item => {
+                dispatchRecords.unshift({
+                    id: Date.now() + Math.random(),
+                    date: orderDoc.date,
+                    customer: item.customer,
+                    docNo: 'ORD-' + orderDoc.id.toString().slice(-6),
+                    productCode: item.code,
+                    oldNo: item.oldNo || '',
+                    model: item.desc,
+                    rating: '',
+                    brand: 'S-OIL',
+                    qty: item.qty,
+                    unit: 'CTN',
+                    remark: `Order Net: RM${item.totalNet.toFixed(2)} (${item.points} Pts)`
+                });
+            });
+
+            localStorage.setItem('soil_dispatch_v1', JSON.stringify(dispatchRecords));
+            orderCart = [];
+            renderOrderCart();
+            updateUIRecords();
+            showToast("🎉 订单建立成功！已同步至出货明细");
         }
-        function setAsDefaultLocation(loc) { lastSelectedLocation = loc; localStorage.setItem('sirim_last_location_v2', loc); updateUILocations(); }
-        function saveLastLocation(val) { lastSelectedLocation = val; localStorage.setItem('sirim_last_location_v2', val); }
-        function deleteLocation(loc) {
-            if(locationsDB.length <= 1) return;
-            showConfirm("删除地点？", `移除 ${loc} 吗？`, function() {
-                locationsDB = locationsDB.filter(l => l !== loc);
-                if(lastSelectedLocation === loc) { lastSelectedLocation = locationsDB[0]; localStorage.setItem('sirim_last_location_v2', lastSelectedLocation); }
-                localStorage.setItem('sirim_locations_v2', JSON.stringify(locationsDB)); updateUILocations();
+
+        // ================== PRICING MODAL & ADD PRODUCT FEATURE ==================
+        function openPricingModal() {
+            renderPricingList();
+            document.getElementById('pricing-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+        function closePricingModal() { document.getElementById('pricing-modal').classList.add('hidden'); }
+
+        function togglePricingAddForm() {
+            const form = document.getElementById('pricing-add-form');
+            const btn = document.getElementById('btn-toggle-price-add');
+            if (form.classList.contains('hidden')) {
+                form.classList.remove('hidden');
+                btn.innerText = "收起表单";
+            } else {
+                form.classList.add('hidden');
+                btn.innerText = "展开新增";
+            }
+        }
+
+        function addNewPricingProduct() {
+            const code = document.getElementById('add-price-code').value.trim();
+            const oldNo = document.getElementById('add-price-old-no').value.trim();
+            const model = document.getElementById('add-price-model').value.trim();
+            const rating = document.getElementById('add-price-rating').value.trim() || 'SAE 5W-30';
+            const price = parseFloat(document.getElementById('add-price-val').value) || 0;
+            const discount = parseFloat(document.getElementById('add-price-disc').value) || 0;
+            const points = parseInt(document.getElementById('add-price-pts').value) || 0;
+
+            if(!code || !model) {
+                showToast("请填写 Product Code / 条码 和 Model 名称", "error");
+                return;
+            }
+
+            // Save directly into productDB with oldNo
+            productDB[code] = {
+                brand: "S-OIL",
+                model: model,
+                type: "SYNTHETIC",
+                rating: rating,
+                productCode: code,
+                oldNo: oldNo,
+                batchNumber: code,
+                price: price.toFixed(2),
+                discount: discount.toFixed(2),
+                points: points.toString()
+            };
+
+            localStorage.setItem('soil_db_v5', JSON.stringify(productDB));
+            
+            // Clear input fields
+            document.getElementById('add-price-code').value = "";
+            document.getElementById('add-price-old-no').value = "";
+            document.getElementById('add-price-model').value = "";
+            document.getElementById('add-price-rating').value = "";
+            document.getElementById('add-price-val').value = "";
+            document.getElementById('add-price-disc').value = "";
+            document.getElementById('add-price-pts').value = "";
+
+            renderPricingList();
+            initOrderProductDropdown();
+            updateUIDB();
+            showToast("✅ 成功添加新产品价格与旧编号！");
+        }
+
+        function renderPricingList() {
+            const list = document.getElementById('pricing-list');
+            list.innerHTML = Object.keys(productDB).map(k => {
+                const p = productDB[k];
+                return `<div class="bg-slate-50 border border-slate-200 p-2.5 rounded-2xl text-xs space-y-1.5">
+                    <div class="font-extrabold text-slate-800 line-clamp-1 flex justify-between items-center">
+                        <span>${p.brand} ${p.rating} <span class="text-[10px] font-normal text-indigo-600">(${p.productCode || k})</span></span>
+                        ${p.oldNo ? `<span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded">OLD: ${p.oldNo}</span>` : ''}
+                    </div>
+                    <div class="text-[10px] text-slate-500 truncate">${p.model}</div>
+                    <div class="grid grid-cols-4 gap-1">
+                        <div><label class="text-[9px] text-slate-500 font-bold block">OLD NO</label><input type="text" onchange="updateProductPrice('${k}', 'oldNo', this.value)" value="${p.oldNo || ''}" placeholder="旧编号" class="w-full px-1 py-1 border rounded bg-white font-bold text-amber-800 text-[10px]"></div>
+                        <div><label class="text-[9px] text-slate-500 font-bold block">Price (RM)</label><input type="number" onchange="updateProductPrice('${k}', 'price', this.value)" value="${p.price || '0.00'}" class="w-full px-1 py-1 border rounded bg-white font-bold text-indigo-700 text-[10px]"></div>
+                        <div><label class="text-[9px] text-slate-500 font-bold block">Disc (RM)</label><input type="number" onchange="updateProductPrice('${k}', 'discount', this.value)" value="${p.discount || '0.00'}" class="w-full px-1 py-1 border rounded bg-white font-bold text-rose-600 text-[10px]"></div>
+                        <div><label class="text-[9px] text-slate-500 font-bold block">Points</label><input type="number" onchange="updateProductPrice('${k}', 'points', this.value)" value="${p.points || '0'}" class="w-full px-1 py-1 border rounded bg-white font-bold text-emerald-700 text-[10px]"></div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function updateProductPrice(key, field, value) {
+            if(productDB[key]) {
+                productDB[key][field] = value;
+                localStorage.setItem('soil_db_v5', JSON.stringify(productDB));
+            }
+        }
+
+        // --- PRICING BACKUP & SYNC ENGINE ---
+        function openPricingSyncModal() {
+            document.getElementById('pricing-sync-code-area').value = "";
+            document.getElementById('pricing-sync-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closePricingSyncModal() {
+            document.getElementById('pricing-sync-modal').classList.add('hidden');
+        }
+
+        function exportPricingFile() {
+            const pricingExtract = {};
+            Object.keys(productDB).forEach(k => {
+                pricingExtract[k] = {
+                    productCode: productDB[k].productCode || k,
+                    oldNo: productDB[k].oldNo || "",
+                    model: productDB[k].model,
+                    price: productDB[k].price || "0.00",
+                    discount: productDB[k].discount || "0.00",
+                    points: productDB[k].points || "0"
+                };
+            });
+            const blob = new Blob([JSON.stringify(pricingExtract, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `Pricing_Discount_Backup_${new Date().toISOString().slice(0,10)}.json`;
+            link.click();
+            showToast("📋 价格与折扣 JSON 备份下载成功");
+        }
+
+        function triggerImportPricing() {
+            document.getElementById('import-pricing-file').click();
+        }
+
+        function importPricingFromFile(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                try {
+                    const data = JSON.parse(evt.target.result);
+                    mergePricingData(data);
+                } catch(err) {
+                    showToast("解析 JSON 价格文件失败", "error");
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = "";
+        }
+
+        function exportPricingCSV() {
+            let csv = "\ufeff\"Barcode / Key\",\"Product Code\",\"OLD NO\",\"Model\",\"Price (RM)\",\"Discount (RM)\",\"Net Price (RM)\",\"Points\"\r\n";
+            Object.keys(productDB).forEach(k => {
+                const p = productDB[k];
+                const pr = parseFloat(p.price || 0);
+                const dc = parseFloat(p.discount || 0);
+                const net = Math.max(0, pr - dc).toFixed(2);
+                csv += `"${k}","${p.productCode || ''}","${p.oldNo || ''}","${p.model}","${p.price || '0.00'}","${p.discount || '0.00'}","${net}","${p.points || '0'}"\r\n`;
+            });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+            link.download = `S-OIL_PriceList_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+            showToast("📊 价格表 Excel CSV 已导出");
+        }
+
+        function triggerImportPricingCSV() {
+            document.getElementById('import-pricing-csv-file').click();
+        }
+
+        // Robust CSV Parser helper that handles quotes and commas
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') {
+                    if (inQuotes && line[i + 1] === '"') {
+                        current += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current.trim());
+            return result;
+        }
+
+        function importPricingFromCSVFile(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                try {
+                    const text = evt.target.result.replace(/^\ufeff/, '');
+                    const lines = text.split(/\r\n|\n/);
+                    let count = 0;
+                    
+                    let keyIdx = -1, codeIdx = -1, oldNoIdx = -1, priceIdx = -1, discIdx = -1, ptsIdx = -1, modelIdx = -1;
+
+                    lines.forEach((line, index) => {
+                        if(!line.trim()) return;
+                        const cols = parseCSVLine(line);
+                        
+                        if(index === 0 && (line.toLowerCase().includes('price') || line.toLowerCase().includes('code') || line.toLowerCase().includes('barcode'))) {
+                            cols.forEach((h, i) => {
+                                const hLower = h.toLowerCase();
+                                if(hLower.includes('barcode') || hLower.includes('key')) keyIdx = i;
+                                else if(hLower.includes('product code') || hLower.includes('code')) codeIdx = i;
+                                else if(hLower.includes('old')) oldNoIdx = i;
+                                else if(hLower.includes('model') || hLower.includes('packing')) modelIdx = i;
+                                else if(hLower.includes('price') && !hLower.includes('net')) priceIdx = i;
+                                else if(hLower.includes('discount') || hLower.includes('disc')) discIdx = i;
+                                else if(hLower.includes('point')) ptsIdx = i;
+                            });
+                            return;
+                        }
+
+                        if(keyIdx === -1 && codeIdx === -1) { keyIdx = 0; codeIdx = 1; oldNoIdx = 2; modelIdx = 3; priceIdx = 4; discIdx = 5; ptsIdx = 7; }
+
+                        const key = cols[keyIdx] || cols[0];
+                        const prodCode = cols[codeIdx] || cols[1];
+                        const oldNoVal = oldNoIdx !== -1 ? cols[oldNoIdx] : '';
+                        const modelName = cols[modelIdx !== -1 ? modelIdx : 3] || "S-OIL Engine Oil";
+                        const price = cols[priceIdx !== -1 ? priceIdx : 4];
+                        const disc = cols[discIdx !== -1 ? discIdx : 5];
+                        const pts = cols[ptsIdx !== -1 ? ptsIdx : 7];
+
+                        let targetKey = null;
+                        if(key && productDB[key]) targetKey = key;
+                        else if(prodCode) targetKey = Object.keys(productDB).find(k => productDB[k].productCode === prodCode);
+                        else if(key) targetKey = Object.keys(productDB).find(k => productDB[k].productCode === key);
+
+                        // If item exists, update it. If not, auto-create it!
+                        if(!targetKey) {
+                            targetKey = prodCode || key;
+                            if(targetKey) {
+                                productDB[targetKey] = {
+                                    brand: "S-OIL",
+                                    model: modelName,
+                                    type: "SYNTHETIC",
+                                    rating: "SAE 5W-30",
+                                    productCode: prodCode || targetKey,
+                                    oldNo: oldNoVal || "",
+                                    batchNumber: targetKey
+                                };
+                            }
+                        }
+
+                        if(targetKey && productDB[targetKey]) {
+                            if(price !== undefined && !isNaN(parseFloat(price))) productDB[targetKey].price = parseFloat(price).toFixed(2);
+                            if(disc !== undefined && !isNaN(parseFloat(disc))) productDB[targetKey].discount = parseFloat(disc).toFixed(2);
+                            if(pts !== undefined && !isNaN(parseInt(pts))) productDB[targetKey].points = parseInt(pts).toString();
+                            if(oldNoVal) productDB[targetKey].oldNo = oldNoVal;
+                            if(modelName && modelName !== "S-OIL Engine Oil") productDB[targetKey].model = modelName;
+                            count++;
+                        }
+                    });
+
+                    if(count > 0) {
+                        localStorage.setItem('soil_db_v5', JSON.stringify(productDB));
+                        openPricingModal();
+                        closePricingSyncModal();
+                        initOrderProductDropdown();
+                        updateUIDB();
+                        showToast(`✅ 成功从 Excel (CSV) 导入并更新了 ${count} 项产品价格与旧编号！`);
+                    } else {
+                        showToast("未匹配到有效的产品条码或价格数据", "error");
+                    }
+                } catch(err) {
+                    showToast("解析 CSV 价格表格失败", "error");
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = "";
+        }
+
+        function copyPricingCode() {
+            const pricingExtract = {};
+            Object.keys(productDB).forEach(k => {
+                pricingExtract[k] = {
+                    oldNo: productDB[k].oldNo || "",
+                    price: productDB[k].price || "0.00",
+                    discount: productDB[k].discount || "0.00",
+                    points: productDB[k].points || "0"
+                };
+            });
+            const area = document.getElementById('pricing-sync-code-area');
+            area.value = JSON.stringify(pricingExtract);
+            area.select();
+            document.execCommand('copy');
+            showToast("📋 价格与折扣同步代码已复制！");
+        }
+
+        function importPricingFromCode() {
+            const code = document.getElementById('pricing-sync-code-area').value.trim();
+            if(!code) return showToast("请先粘贴价格同步代码", "error");
+            try {
+                const parsed = JSON.parse(code);
+                mergePricingData(parsed);
+                document.getElementById('pricing-sync-code-area').value = "";
+            } catch(e) {
+                showToast("数据代码格式无效", "error");
+            }
+        }
+
+        function mergePricingData(data) {
+            let count = 0;
+            for(const key in data) {
+                if(productDB[key]) {
+                    if(data[key].price !== undefined) productDB[key].price = data[key].price;
+                    if(data[key].discount !== undefined) productDB[key].discount = data[key].discount;
+                    if(data[key].points !== undefined) productDB[key].points = data[key].points;
+                    if(data[key].oldNo !== undefined) productDB[key].oldNo = data[key].oldNo;
+                    count++;
+                } else {
+                    const matchedKey = Object.keys(productDB).find(k => productDB[k].productCode === key);
+                    if(matchedKey) {
+                        if(data[key].price !== undefined) productDB[matchedKey].price = data[key].price;
+                        if(data[key].discount !== undefined) productDB[matchedKey].discount = data[key].discount;
+                        if(data[key].points !== undefined) productDB[matchedKey].points = data[key].points;
+                        if(data[key].oldNo !== undefined) productDB[matchedKey].oldNo = data[key].oldNo;
+                        count++;
+                    }
+                }
+            }
+            localStorage.setItem('soil_db_v5', JSON.stringify(productDB));
+            openPricingModal();
+            closePricingSyncModal();
+            showToast(`✅ 价格表更新成功，覆盖了 ${count} 项产品价格！`);
+        }
+
+        function resetDefaultPricing() {
+            showConfirm("重置价格表", "确定恢复出厂价格与折扣设置吗？", () => {
+                Object.keys(defaultProducts).forEach(k => {
+                    if(productDB[k]) {
+                        productDB[k].price = defaultProducts[k].price;
+                        productDB[k].discount = defaultProducts[k].discount;
+                        productDB[k].points = defaultProducts[k].points;
+                        productDB[k].oldNo = defaultProducts[k].oldNo;
+                    }
+                });
+                localStorage.setItem('soil_db_v5', JSON.stringify(productDB));
+                openPricingModal();
+                closePricingSyncModal();
+                showToast("已恢复出厂价格表");
             });
         }
 
-        function showConfirm(title, message, callback) {
-            document.getElementById('confirm-title').innerText = title; document.getElementById('confirm-message').innerText = message;
-            confirmCallback = callback; document.getElementById('confirm-modal').classList.remove('hidden');
-        }
-        function setupConfirmHandlers() {
-            document.getElementById('confirm-cancel').onclick = function() { document.getElementById('confirm-modal').classList.add('hidden'); };
-            document.getElementById('confirm-ok').onclick = function() { document.getElementById('confirm-modal').classList.add('hidden'); if (confirmCallback) confirmCallback(); };
+        // ================== CUSTOMER BACKUP & SYNC LOGIC ==================
+        function openCustomerModal() {
+            document.getElementById('new-customer-name-input').value = "";
+            document.getElementById('customer-sync-code-area').value = "";
+            renderCustomerList();
+            document.getElementById('customer-modal').classList.remove('hidden');
+            lucide.createIcons();
         }
 
+        function closeCustomerModal() {
+            document.getElementById('customer-modal').classList.add('hidden');
+        }
+
+        function renderCustomerList() {
+            const listContainer = document.getElementById('customer-list-container');
+            document.getElementById('customer-count-badge').innerText = customerDatabase.length;
+
+            if (customerDatabase.length === 0) {
+                listContainer.innerHTML = '<div class="text-center text-slate-400 text-xs py-4">客户列表为空</div>';
+                return;
+            }
+
+            listContainer.innerHTML = customerDatabase.slice().sort().map((cust) => `
+                <div class="bg-white border border-slate-200 px-3 py-2 rounded-xl text-xs flex justify-between items-center shadow-sm">
+                    <span class="font-extrabold text-slate-700 truncate pr-2">${cust}</span>
+                    <button onclick="deleteCustomerByName('${cust.replace(/'/g, "\\'")}')" class="text-slate-300 hover:text-rose-500 p-1 transition-colors">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function addNewCustomerFromModal() {
+            const input = document.getElementById('new-customer-name-input');
+            const name = input.value.trim();
+            if(!name) return showToast("请输入有效的客户名字", "error");
+            if(customerDatabase.includes(name)) return showToast("客户名字已存在", "error");
+
+            customerDatabase.push(name);
+            saveCustomers();
+            input.value = "";
+            renderCustomerList();
+            showToast("✅ 客户添加成功");
+        }
+
+        function deleteCustomerByName(name) {
+            showConfirm("删除客户", `确定删除客户 "${name}" 吗？`, () => {
+                customerDatabase = customerDatabase.filter(c => c !== name);
+                saveCustomers();
+                renderCustomerList();
+                showToast("已删除客户");
+            });
+        }
+
+        function saveCustomers() {
+            localStorage.setItem('soil_cust_v1', JSON.stringify(customerDatabase));
+            initCustomerDropdown();
+        }
+
+        function exportCustomerFile() {
+            const blob = new Blob([JSON.stringify(customerDatabase, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `Customers_Backup_${new Date().toISOString().slice(0,10)}.json`;
+            link.click();
+            showToast("📋 客户列表 JSON 备份下载已触发");
+        }
+
+        function exportCustomerCSV() {
+            if(customerDatabase.length === 0) return showToast("客户名单为空", "error");
+            let csv = "\ufeff\"No.\",\"Customer Name\"\r\n";
+            customerDatabase.slice().sort().forEach((cust, i) => {
+                csv += `"${i+1}","${cust.replace(/"/g, '""')}"\r\n`;
+            });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+            link.download = `Customers_List_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+            showToast("📊 客户列表 Excel (CSV) 导出成功");
+        }
+
+        function triggerImportCustomerCSV() {
+            document.getElementById('import-customer-csv-file').click();
+        }
+
+        function importCustomerFromCSVFile(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                try {
+                    const text = evt.target.result.replace(/^\ufeff/, '');
+                    const lines = text.split(/\r\n|\n/);
+                    let imported = [];
+                    lines.forEach(line => {
+                        if(!line.trim()) return;
+                        const cols = parseCSVLine(line);
+                        cols.forEach(col => {
+                            if(col && !col.toLowerCase().includes('customer') && !col.toLowerCase().includes('no.') && !/^\d+$/.test(col)) {
+                                imported.push(col);
+                            }
+                        });
+                    });
+                    if(imported.length > 0) {
+                        mergeCustomers(imported);
+                    } else {
+                        showToast("未在 CSV 文件中找到有效的客户名称", "error");
+                    }
+                } catch(err) {
+                    showToast("解析 CSV 文件失败", "error");
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = "";
+        }
+
+        function triggerImportCustomer() {
+            document.getElementById('import-customer-file').click();
+        }
+
+        function importCustomerFromFile(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                try {
+                    const imported = JSON.parse(evt.target.result);
+                    if(Array.isArray(imported)) {
+                        mergeCustomers(imported);
+                    } else {
+                        showToast("文件内容格式有误", "error");
+                    }
+                } catch(err) {
+                    showToast("解析 JSON 文件失败", "error");
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = "";
+        }
+
+        function copyCustomerCode() {
+            const area = document.getElementById('customer-sync-code-area');
+            area.value = JSON.stringify(customerDatabase);
+            area.select();
+            document.execCommand('copy');
+            showToast("📋 客户名单同步代码已复制！");
+        }
+
+        function importCustomerFromCode() {
+            const code = document.getElementById('customer-sync-code-area').value.trim();
+            if(!code) return showToast("请先粘贴客户同步代码", "error");
+            try {
+                const parsed = JSON.parse(code);
+                if(Array.isArray(parsed)) {
+                    mergeCustomers(parsed);
+                    document.getElementById('customer-sync-code-area').value = "";
+                } else {
+                    showToast("代码格式无效", "error");
+                }
+            } catch(e) {
+                showToast("格式错误，解析失败", "error");
+            }
+        }
+
+        function mergeCustomers(newList) {
+            let addedCount = 0;
+            newList.forEach(item => {
+                if(typeof item === 'string' && item.trim() && !customerDatabase.includes(item.trim())) {
+                    customerDatabase.push(item.trim());
+                    addedCount++;
+                }
+            });
+            saveCustomers();
+            renderCustomerList();
+            showToast(`✅ 成功合并 ${addedCount} 个新客户！`);
+        }
+
+        function resetDefaultCustomers() {
+            showConfirm("恢复客户默认列表", "确定要恢复系统初始客户列表吗？", () => {
+                customerDatabase = [...defaultCustomers];
+                saveCustomers();
+                renderCustomerList();
+                showToast("已恢复初始客户列表");
+            });
+        }
+
+        // ================== TAB SWITCHER ==================
         function switchTab(tab) {
-            ['scan', 'dispatch', 'stock', 'db', 'records'].forEach(t => {
+            ['order', 'scan', 'dispatch', 'balance', 'records', 'db'].forEach(t => {
                 document.getElementById('tab-' + t).classList.add('hidden');
-                const nav = document.getElementById('nav-' + t);
-                nav.className = nav.className.replace('text-blue-600 scale-105', 'text-slate-400 hover:text-slate-600 transition-all duration-200');
-                nav.querySelector('div').classList.remove('bg-blue-50');
+                document.getElementById('nav-' + t).className = "flex flex-col items-center gap-0.5 text-slate-400 w-1/6 transition-all duration-200";
+                const iconBg = document.getElementById('nav-' + t).querySelector('div');
+                if(iconBg) iconBg.className = "p-1 rounded-xl";
             });
             
             document.getElementById('tab-' + tab).classList.remove('hidden');
             const activeNav = document.getElementById('nav-' + tab);
-            activeNav.className = activeNav.className.replace('text-slate-400 hover:text-slate-600', 'text-blue-600 scale-105');
-            activeNav.querySelector('div').classList.add('bg-blue-50');
+            activeNav.className = "flex flex-col items-center gap-0.5 text-indigo-600 w-1/6 scale-105 transition-all duration-200";
+            activeNav.querySelector('div').className = "p-1 rounded-xl bg-indigo-50";
             
-            if(tab === 'stock') updateUIRecords(); 
-            
+            if(tab === 'balance') renderBalance();
             lucide.createIcons();
         }
 
         function showToast(msg, type = 'success') {
-            const t = document.getElementById('toast'); document.getElementById('toast-msg').innerText = msg;
-            t.classList.remove('hidden'); t.className = "fixed top-4 left-4 right-4 z-50 bg-slate-900/95 text-white px-4 py-3 rounded-2xl flex items-center justify-between border transition-all duration-300 transform translate-y-0 opacity-100 shadow-2xl";
-            setTimeout(() => { t.className = t.className + " hidden opacity-0"; }, 3000);
+            const t = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            t.classList.remove('hidden');
+            t.className = "fixed top-4 left-4 right-4 z-50 bg-slate-900/95 text-white px-4 py-3 rounded-2xl flex items-center justify-between border shadow-2xl transition-all duration-300 transform translate-y-0 opacity-100";
+            setTimeout(() => { t.className = t.className + " hidden opacity-0"; }, 2500);
         }
         function closeToast() { document.getElementById('toast').classList.add('hidden'); }
 
-        // --- 扫码和检索处理 ---
+        // --- SCANNING HANDLERS ---
+        function startScanning() { scanMode = 'receive'; document.getElementById('scan-title').innerText = "扫码入库"; _initScanner(); }
+        function startScanningDispatch() { scanMode = 'dispatch'; document.getElementById('scan-title').innerText = "扫码出货"; _initScanner(); }
+        function startScanningOrder() { scanMode = 'order'; document.getElementById('scan-title').innerText = "开单扫码产品"; _initScanner(); }
+
+        function _initScanner() {
+            document.getElementById('scanner-modal').classList.remove('hidden');
+            html5QrcodeScanner = new Html5Qrcode("interactive");
+            html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 280, height: 160 } }, 
+                (txt) => { 
+                    stopScanning(); 
+                    if(scanMode === 'receive') lookupBarcode(txt); 
+                    else if(scanMode === 'dispatch') lookupBarcodeDispatch(txt); 
+                    else if(scanMode === 'order') lookupProductForOrder(txt);
+                }, 
+                () => {}
+            );
+        }
+        function stopScanning() { if(html5QrcodeScanner) html5QrcodeScanner.stop().then(() => document.getElementById('scanner-modal').classList.add('hidden')); else document.getElementById('scanner-modal').classList.add('hidden'); }
+        
+        function triggerFileScan() { scanMode = 'receive'; document.getElementById('file-scanner').click(); }
+        function scanFromFile(e) {
+            const file = e.target.files[0]; if(!file) return;
+            document.getElementById('file-loading-overlay').classList.remove('hidden');
+            new Html5Qrcode("interactive").scanFile(file, true).then(txt => {
+                document.getElementById('file-loading-overlay').classList.add('hidden');
+                e.target.value = "";
+                lookupBarcode(txt);
+            }).catch(err => {
+                document.getElementById('file-loading-overlay').classList.add('hidden');
+                e.target.value = "";
+                showToast("照片解析失败，请拍照清晰平整", "error");
+            });
+        }
+
+        // --- LOOKUP FUNCTIONS ---
         function lookupBarcode(input = null) {
             const code = input || document.getElementById('manual-barcode').value.trim(); if(!code) return;
-            document.getElementById('manual-barcode').value = code;
-            const p = productDB[code];
+            document.getElementById('manual-barcode').value = code; const p = productDB[code];
             if(p) {
-                document.getElementById('preview-brand').innerText = p.brand; document.getElementById('preview-rating').innerText = p.rating;
-                document.getElementById('preview-model').innerText = p.model; document.getElementById('preview-type').innerText = p.type;
+                document.getElementById('preview-brand').innerText = p.brand;
+                document.getElementById('preview-rating').innerText = p.rating;
+                document.getElementById('preview-model').innerText = p.model;
+                document.getElementById('preview-type').innerText = p.type;
                 document.getElementById('preview-code').innerText = p.productCode || "无";
-                document.getElementById('match-status').innerText = "已自动秒填";
-                document.getElementById('match-status').className = "text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30";
+                document.getElementById('match-status').innerText = "已识别";
+                document.getElementById('match-status').className = "text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30";
                 
                 document.getElementById('input-product-code').value = p.productCode || "";
                 document.getElementById('input-batch-number').value = p.batchNumber || code; 
-                
                 activeProduct = { barcode: code, ...p };
-                showToast(`✅ 匹配成功: ${p.model}`);
+                showToast("✅ 匹配成功！");
             } else {
-                document.getElementById('preview-brand').innerText = "-"; document.getElementById('preview-rating').innerText = "-"; document.getElementById('preview-model').innerText = "-"; document.getElementById('preview-type').innerText = "-"; document.getElementById('preview-code').innerText = "-";
-                document.getElementById('match-status').innerText = "未在数据库"; document.getElementById('match-status').className = "text-[10px] px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-400 font-bold border border-rose-500/30";
-                
-                document.getElementById('input-product-code').value = ""; document.getElementById('input-batch-number').value = "";
-                showToast("❌ 该条码未在字典注册！", "error"); activeProduct = null;
+                _resetPreview('receive');
+                showToast("❌ 未找到该条码", "error");
+            }
+        }
+        
+        function lookupBarcodeDispatch(input = null) {
+            const code = input || document.getElementById('manual-barcode-dispatch').value.trim(); if(!code) return;
+            document.getElementById('manual-barcode-dispatch').value = code; const p = productDB[code];
+            if(p) {
+                document.getElementById('preview-brand-dispatch').innerText = `${p.brand} ${p.rating}`;
+                document.getElementById('preview-model-dispatch').innerText = p.model;
+                document.getElementById('match-status-dispatch').innerText = "已就绪";
+                document.getElementById('match-status-dispatch').className = "text-[9px] px-2 py-0.5 rounded-full bg-amber-500 text-white font-bold";
+                activeProduct = { barcode: code, ...p };
+                showToast("✅ 可以出货");
+            } else {
+                _resetPreview('dispatch');
+                showToast("❌ 未找到该条码", "error");
             }
         }
 
-        function startScanning() {
-            document.getElementById('scanner-modal').classList.remove('hidden');
-            html5QrcodeScanner = new Html5Qrcode("interactive");
-            html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 280, height: 160 } }, onScanSuccess, onScanFailure);
-        }
-        function onScanSuccess(txt) { stopScanning(); lookupBarcode(txt); }
-        function onScanFailure() {}
-        function stopScanning() { if(html5QrcodeScanner) html5QrcodeScanner.stop().then(() => document.getElementById('scanner-modal').classList.add('hidden')); else document.getElementById('scanner-modal').classList.add('hidden'); }
-
-        function triggerFileScan() { document.getElementById('file-scanner').click(); }
-        function scanFromFile(e) {
-            const file = e.target.files[0]; if(!file) return;
-            const overlay = document.getElementById('file-loading-overlay'); overlay.classList.remove('hidden');
-            new Html5Qrcode("interactive").scanFile(file, true).then(txt => { overlay.classList.add('hidden'); e.target.value = ""; lookupBarcode(txt); }).catch(err => { overlay.classList.add('hidden'); e.target.value = ""; showToast("❌ 照片过于模糊或未找到条形码！", "error"); });
-        }
-
-        // --- 记录操作逻辑 ---
-        function addRecord(type) {
-            if(!activeProduct) { showToast("❌ 请先扫描机油条码！", "error"); return; }
-            
-            if(type === 'inventory') {
-                const pc = document.getElementById('input-product-code').value.trim();
-                const bn = document.getElementById('input-batch-number').value.trim(); 
-                const qty = parseInt(document.getElementById('input-qty').value);
-                const unit = document.getElementById('input-unit').value; 
-                const loc = document.getElementById('input-location').value;
-                const rem = document.getElementById('input-remark').value.trim();
-                
-                if(!pc || !qty || qty <= 0) { showToast("❌ 代码和数量必填！", "error"); return; }
-                
-                records.unshift({ id: Date.now(), timestamp: new Date().toISOString(), brand: activeProduct.brand, model: activeProduct.model, type: activeProduct.type, rating: activeProduct.rating, productCode: pc, batchNumber: bn, qty, unit: unit, location: loc, remark: rem });
-                localStorage.setItem('sirim_records_v4', JSON.stringify(records));
-                
-                document.getElementById('input-qty').value = ""; document.getElementById('input-remark').value = ""; 
-                showToast("✅ 盘点入库已保存！");
-                
-            } else if (type === 'dispatch') {
-                const customer = document.getElementById('disp-customer').value.trim();
-                const docNo = document.getElementById('disp-doc-no').value.trim();
-                const date = document.getElementById('disp-date').value;
-                const qty = parseInt(document.getElementById('disp-qty').value);
-                const unit = document.getElementById('disp-unit').value;
-                const rem = document.getElementById('disp-remark').value.trim();
-
-                if(!customer || !qty || qty <= 0) { showToast("❌ 客户和发出数量必填！", "error"); return; }
-
-                dispatchRecords.unshift({ id: Date.now(), date: date, customer: customer, docNo: docNo, brand: activeProduct.brand, model: activeProduct.model, rating: activeProduct.rating, productCode: activeProduct.productCode, barcode: activeProduct.barcode, qty: qty, unit: unit, remark: rem });
-                localStorage.setItem('sirim_dispatch_records_v1', JSON.stringify(dispatchRecords));
-
-                document.getElementById('disp-qty').value = ""; document.getElementById('disp-remark').value = "";
-                showToast("🚚 出货单已生成！");
-            }
-            
-            document.getElementById('manual-barcode').value = ""; document.getElementById('preview-brand').innerText = "-"; document.getElementById('preview-rating').innerText = "-"; document.getElementById('preview-model').innerText = "-"; document.getElementById('preview-type').innerText = "-"; document.getElementById('preview-code').innerText = "-";
-            document.getElementById('match-status').innerText = "等待扫码"; document.getElementById('match-status').className = "text-[10px] px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 font-bold border border-slate-700";
+        function _resetPreview(type) {
             activeProduct = null;
-            updateUIRecords(); 
+            if(type === 'receive') {
+                document.getElementById('preview-brand').innerText = "-";
+                document.getElementById('preview-rating').innerText = "-";
+                document.getElementById('preview-model').innerText = "-";
+                document.getElementById('preview-type').innerText = "-";
+                document.getElementById('preview-code').innerText = "-";
+                document.getElementById('match-status').innerText = "等待";
+                document.getElementById('match-status').className = "text-[9px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-bold border border-slate-700";
+            } else {
+                document.getElementById('preview-brand-dispatch').innerText = "-";
+                document.getElementById('preview-model-dispatch').innerText = "-";
+                document.getElementById('match-status-dispatch').innerText = "等待";
+                document.getElementById('match-status-dispatch').className = "text-[9px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-600 font-bold border border-amber-200";
+            }
         }
 
-        function deleteRecord(id, type) { 
-            if(type === 'inventory') { records = records.filter(r => r.id !== id); localStorage.setItem('sirim_records_v4', JSON.stringify(records)); }
-            else { dispatchRecords = dispatchRecords.filter(r => r.id !== id); localStorage.setItem('sirim_dispatch_records_v1', JSON.stringify(dispatchRecords)); }
-            updateUIRecords(); 
+        // --- RECORD SAVING & LIST MANAGEMENT ---
+        function addRecord(actionType) {
+            if(!activeProduct) return showToast("请先扫码或选择一个产品", "error");
+            let recordData = {
+                id: Date.now(),
+                action: actionType,
+                brand: activeProduct.brand,
+                model: activeProduct.model,
+                type: activeProduct.type,
+                rating: activeProduct.rating,
+                productCode: activeProduct.productCode,
+                oldNo: activeProduct.oldNo || '',
+                barcode: activeProduct.barcode,
+                date: new Date().toISOString().slice(0, 10)
+            };
+            
+            if(actionType === 'receive') {
+                const qty = parseInt(document.getElementById('input-qty').value);
+                if(!qty || qty <= 0) { showToast("入库数量必填", "error"); return; }
+                recordData.qty = qty;
+                recordData.unit = document.getElementById('input-unit').value;
+                recordData.batchNumber = document.getElementById('input-batch-number').value.trim();
+                recordData.location = document.getElementById('input-location').value;
+                recordData.remark = document.getElementById('input-remark').value.trim();
+                
+                records.unshift(recordData);
+                localStorage.setItem('soil_rec_v5', JSON.stringify(records));
+                
+                document.getElementById('input-qty').value = "";
+                document.getElementById('input-remark').value = "";
+                document.getElementById('manual-barcode').value = "";
+                _resetPreview('receive');
+            } else if (actionType === 'dispatch') {
+                const qty = parseInt(document.getElementById('dispatch-qty').value);
+                const cust = document.getElementById('dispatch-customer').value.trim();
+                const doNum = document.getElementById('dispatch-do').value.trim();
+                if(!qty || qty <= 0 || !cust) { showToast("数量和客户为必填", "error"); return; }
+                
+                recordData.qty = qty;
+                recordData.unit = document.getElementById('dispatch-unit').value;
+                recordData.date = document.getElementById('dispatch-date').value;
+                recordData.customer = cust;
+                recordData.docNo = doNum;
+                
+                dispatchRecords.unshift(recordData);
+                localStorage.setItem('soil_dispatch_v1', JSON.stringify(dispatchRecords));
+                
+                document.getElementById('dispatch-qty').value = "";
+                document.getElementById('manual-barcode-dispatch').value = "";
+                _resetPreview('dispatch');
+            }
+
+            updateUIRecords();
+            showToast(actionType === 'receive' ? "✅ 入库保存成功！" : "🚚 出货保存成功！");
         }
-        function clearRecords(type) { 
-            showConfirm("清空数据吗？", "彻底删除当前列表的所有记录！", function() { 
-                if(type === 'inventory') { records = []; localStorage.setItem('sirim_records_v4', JSON.stringify(records)); }
-                else { dispatchRecords = []; localStorage.setItem('sirim_dispatch_records_v1', JSON.stringify(dispatchRecords)); }
-                updateUIRecords(); 
-            }); 
+
+        function deleteRecord(id) {
+            records = records.filter(r => r.id !== id);
+            dispatchRecords = dispatchRecords.filter(r => r.id !== id);
+            localStorage.setItem('soil_rec_v5', JSON.stringify(records));
+            localStorage.setItem('soil_dispatch_v1', JSON.stringify(dispatchRecords));
+            updateUIRecords();
+        }
+
+        function clearRecordsByType(type) { 
+            const msg = type === 'receive' ? "清空所有入库记录？" : "清空所有出货记录？";
+            showConfirm("二次确认", msg, () => {
+                if(type === 'receive') { records = []; localStorage.setItem('soil_rec_v5', JSON.stringify(records)); }
+                else { dispatchRecords = []; localStorage.setItem('soil_dispatch_v1', JSON.stringify(dispatchRecords)); }
+                updateUIRecords();
+            });
         }
 
         function updateUIRecords() {
-            // 1. 更新盘点列表
-            document.getElementById('list-total-badge').innerText = records.length;
-            const bc = document.getElementById('badge-count'); bc.innerText = records.length + dispatchRecords.length; if(records.length + dispatchRecords.length > 0) bc.classList.remove('hidden'); else bc.classList.add('hidden');
-            if(records.length === 0) { document.getElementById('records-container').innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">暂无入库记录</div>`; }
-            else {
-                document.getElementById('records-container').innerHTML = records.map((r) => {
-                    const u = r.unit || 'CTN'; const displayUnit = u === 'BTL' ? '瓶' : '箱';
-                    const dt = r.timestamp ? new Date(r.timestamp).toLocaleDateString() : '';
-                    return `
-                    <div class="bg-blue-50/50 border border-blue-100/50 p-3 rounded-2xl flex justify-between items-start text-xs relative">
-                        <div class="space-y-1 flex-1 pr-2">
-                            <div class="flex justify-between items-center w-full">
-                                <div class="font-extrabold text-blue-900">${r.brand} ${r.rating}</div>
-                                <div class="text-[9px] text-blue-600 bg-blue-100 px-1 rounded">${dt}</div>
-                            </div>
-                            <div class="text-slate-600 font-semibold truncate text-[10px] w-48">${r.model}</div>
-                            <div class="flex gap-2 text-[10px] text-slate-500 pt-1 mt-1">
-                                <span>数量: <span class="font-bold text-blue-600">${r.qty} ${displayUnit}</span></span>
-                                <span class="text-emerald-600 bg-emerald-50 px-1 rounded">代码: ${r.productCode}</span>
-                            </div>
-                            ${r.remark ? `<div class="text-[9px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 mt-1 inline-block rounded">备注: ${r.remark}</div>` : ''}
-                        </div>
-                        <button onclick="deleteRecord(${r.id}, 'inventory')" class="text-slate-300 hover:text-rose-500 p-1"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
-                    </div>`
-                }).join('');
-            }
+            const badgeCount = records.length + dispatchRecords.length;
+            document.getElementById('badge-count').innerText = badgeCount;
+            document.getElementById('badge-count').classList.toggle('hidden', badgeCount === 0);
+            
+            document.getElementById('count-recv').innerText = records.length;
+            document.getElementById('count-disp').innerText = dispatchRecords.length;
 
-            // 2. 更新出货列表
-            document.getElementById('dispatch-total-badge').innerText = dispatchRecords.length;
-            if(dispatchRecords.length === 0) { document.getElementById('dispatch-records-container').innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">暂无出货记录</div>`; }
-            else {
-                document.getElementById('dispatch-records-container').innerHTML = dispatchRecords.map((r) => {
-                    const displayUnit = r.unit === 'BTL' ? '瓶' : '箱';
-                    return `
-                    <div class="bg-amber-50/50 border border-amber-100/50 p-3 rounded-2xl flex justify-between items-start text-xs">
-                        <div class="space-y-1 flex-1 pr-2">
-                            <div class="flex justify-between items-center">
-                                <span class="font-extrabold text-amber-900 line-clamp-1 max-w-[120px]">${r.customer}</span>
-                                <span class="text-[9px] text-amber-600 bg-amber-100 px-1 rounded">${r.date.slice(5)}</span>
-                            </div>
-                            <div class="font-bold text-slate-800 text-[11px] pt-1">${r.brand} ${r.rating}</div>
-                            <div class="text-slate-500 font-medium truncate text-[9px] w-48">${r.model}</div>
-                            <div class="flex flex-wrap gap-2 text-[10px] text-slate-500 pt-1 mt-1 border-t border-amber-100">
-                                <span>发出: <span class="font-bold text-amber-600">${r.qty} ${displayUnit}</span></span>
-                                <span>D.O: ${r.docNo || '-'}</span>
-                                <span class="text-blue-600 bg-blue-50 px-1 rounded font-bold">代码: ${r.productCode || '-'}</span>
-                            </div>
+            // Render Inbound list
+            document.getElementById('records-receive-container').innerHTML = records.length ? records.map(r => {
+                const uStr = r.unit === 'BTL' ? '瓶' : '箱';
+                return `<div class="bg-blue-50 border border-blue-100 p-3 rounded-xl flex justify-between items-start text-xs">
+                    <div class="space-y-1 flex-1 pr-2">
+                        <div class="flex justify-between items-center"><span class="font-extrabold text-blue-900">${r.brand} ${r.rating}</span><span class="text-[9px] text-blue-500 font-bold">${r.date || ''}</span></div>
+                        <div class="text-[10px] text-slate-600">${r.model}</div>
+                        <div class="flex gap-2 text-[10px] pt-1">
+                            <span class="bg-blue-100 text-blue-800 font-bold px-1.5 py-0.5 rounded">+${r.qty} ${uStr}</span>
+                            <span class="text-slate-500">Code: <b>${r.productCode || '-'}</b></span>
+                            ${r.remark ? `<span class="text-amber-600 font-bold">注: ${r.remark}</span>` : ''}
                         </div>
-                        <button onclick="deleteRecord(${r.id}, 'dispatch')" class="text-slate-300 hover:text-rose-500 p-1"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
-                    </div>`
-                }).join('');
-            }
+                    </div>
+                    <button onclick="deleteRecord(${r.id})" class="text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>`;
+            }).join('') : '<div class="text-center text-slate-400 text-[10px] py-2">暂无入库数据</div>';
 
-            // 3. 核心计算：生成当前实时库存结余 (Net Stock Balance)
-            let balances = {};
+            // Render Outbound list
+            document.getElementById('records-dispatch-container').innerHTML = dispatchRecords.length ? dispatchRecords.map(r => {
+                const uStr = r.unit === 'BTL' ? '瓶' : '箱';
+                return `<div class="bg-amber-50 border border-amber-100 p-3 rounded-xl flex justify-between items-start text-xs">
+                    <div class="space-y-1 flex-1 pr-2">
+                        <div class="flex justify-between items-center"><span class="font-extrabold text-amber-900">${r.customer || '客户'}</span><span class="text-[9px] text-amber-600 font-bold">${r.date || ''}</span></div>
+                        <div class="text-[10px] text-slate-600">${r.model || r.brand}</div>
+                        <div class="flex gap-2 text-[10px] pt-1">
+                            <span class="bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded">-${r.qty} ${uStr}</span>
+                            <span class="text-slate-500">Code: <b>${r.productCode || '-'}</b></span>
+                            ${r.docNo ? `<span class="text-slate-500">D.O: ${r.docNo}</span>` : ''}
+                        </div>
+                    </div>
+                    <button onclick="deleteRecord(${r.id})" class="text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>`;
+            }).join('') : '<div class="text-center text-slate-400 text-[10px] py-2">暂无出货数据</div>';
+
+            lucide.createIcons();
+            if(!document.getElementById('tab-balance').classList.contains('hidden')) renderBalance();
+        }
+
+        // --- STOCK BALANCE CALCULATION ---
+        function renderBalance() {
+            let inv = {};
             records.forEach(r => {
-                let key = r.productCode + '_' + (r.unit || 'CTN');
-                if(!balances[key]) balances[key] = { model: r.model, code: r.productCode, rating: r.rating, brand: r.brand, unit: r.unit || 'CTN', in: 0, out: 0, net: 0 };
-                balances[key].in += r.qty;
-                balances[key].net += r.qty;
+                const code = r.productCode || r.barcode || r.model;
+                const unit = r.unit || 'CTN';
+                const key = `${code}_${unit}`;
+                if(!inv[key]) {
+                    const pd = productDB[r.barcode] || { brand: r.brand, rating: r.rating, model: r.model };
+                    inv[key] = { code: code, brand: pd.brand, rating: pd.rating, model: pd.model, unit: unit, in: 0, out: 0, bal: 0 };
+                }
+                inv[key].in += r.qty;
+                inv[key].bal += r.qty;
             });
+
             dispatchRecords.forEach(r => {
-                let key = r.productCode + '_' + (r.unit || 'CTN');
-                if(!balances[key]) balances[key] = { model: r.model, code: r.productCode, rating: r.rating, brand: r.brand, unit: r.unit || 'CTN', in: 0, out: 0, net: 0 };
-                balances[key].out += r.qty;
-                balances[key].net -= r.qty;
+                const code = r.productCode || r.barcode || r.model;
+                const unit = r.unit || 'CTN';
+                const key = `${code}_${unit}`;
+                if(!inv[key]) {
+                    const pd = productDB[r.barcode] || { brand: r.brand, rating: r.rating, model: r.model };
+                    inv[key] = { code: code, brand: pd.brand, rating: pd.rating, model: pd.model, unit: unit, in: 0, out: 0, bal: 0 };
+                }
+                inv[key].out += r.qty;
+                inv[key].bal -= r.qty;
             });
 
-            const stockContainer = document.getElementById('stock-container');
-            const keys = Object.keys(balances);
-            if(keys.length === 0) {
-                stockContainer.innerHTML = `<div class="text-center py-10 text-slate-400 text-xs flex flex-col items-center"><i data-lucide="package-open" class="w-8 h-8 mb-2 opacity-50"></i>暂无库存数据，请先录入盘点或出货。</div>`;
-            } else {
-                stockContainer.innerHTML = keys.map(k => {
-                    const b = balances[k];
-                    const u = b.unit === 'BTL' ? '瓶' : '箱';
-                    const netColor = b.net > 0 ? 'text-emerald-600' : (b.net < 0 ? 'text-rose-600' : 'text-slate-700');
-                    return `
-                        <div class="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm text-xs relative overflow-hidden">
-                            ${b.net < 0 ? '<div class="absolute right-0 top-0 bg-rose-500 text-white text-[8px] font-bold px-2 py-0.5 rounded-bl-lg">超卖警告</div>' : ''}
-                            <div class="font-extrabold text-slate-800 mb-1">${b.brand} ${b.rating}</div>
-                            <div class="text-slate-500 text-[10px] mb-2 leading-relaxed truncate">${b.model}</div>
-                            <div class="flex justify-between items-end border-t border-slate-50 pt-2.5">
-                                <div class="space-y-1">
-                                    <div class="text-[10px] text-slate-400">代码: <span class="font-bold text-slate-600">${b.code}</span></div>
-                                    <div class="text-[10px] text-slate-400 flex gap-2"><span>入: <b class="text-blue-600">${b.in}</b></span><span>出: <b class="text-amber-500">${b.out}</b></span></div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="text-[9px] text-slate-400 mb-0.5">结余 (Net)</div>
-                                    <div class="text-xl font-black tracking-tight ${netColor}">${b.net} <span class="text-[10px] font-bold text-slate-400 ml-0.5">${u}</span></div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
+            const html = Object.values(inv).map(item => {
+                const uStr = item.unit === 'BTL' ? '瓶' : '箱';
+                const isNeg = item.bal < 0;
+                const bgClass = isNeg ? 'bg-rose-50 border-rose-200' : 'bg-slate-50 border-slate-100';
+                const numClass = isNeg ? 'text-rose-600' : (item.bal > 0 ? 'text-emerald-600' : 'text-slate-400');
+                
+                return `<div class="${bgClass} border p-3 rounded-xl flex justify-between items-center text-xs">
+                    <div class="flex-1 pr-2">
+                        <div class="font-extrabold text-slate-800">${item.brand || 'S-OIL'} ${item.rating || ''}</div>
+                        <div class="text-[9px] text-slate-500">${item.model || ''}</div>
+                        <div class="text-[9px] text-slate-400 pt-1">入库: ${item.in} | 出货: ${item.out} | Code: <b>${item.code}</b></div>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <div class="text-[10px] text-slate-500 mb-0.5">实时结余 (${uStr})</div>
+                        <div class="text-lg font-black ${numClass}">${item.bal}</div>
+                    </div>
+                </div>`;
+            }).join('');
+            
+            document.getElementById('balance-container').innerHTML = html || '<div class="text-center text-slate-400 text-xs py-10">尚无任何出入库记录，无法计算库存</div>';
+        }
 
+        // --- CSV EXPORT ENGINE ---
+        function exportToCSV(type) {
+            let csv = "\ufeff";
+            if(type === 'receive') {
+                if(records.length === 0) return showToast("入库明细为空，无可导出数据", "error");
+                csv += "\"No.\",\"Date\",\"Brand\",\"Model\",\"Type\",\"Rating\",\"Product Code\",\"OLD NO\",\"Batch Number\",\"Qty\",\"Unit\",\"Location\",\"Remark\"\r\n";
+                records.forEach((r, i) => {
+                    csv += `"${i+1}","${r.date || ''}","${r.brand}","${r.model}","${r.type}","${r.rating}","${r.productCode}","${r.oldNo || ''}","${r.batchNumber || ''}","${r.qty}","${r.unit || 'CTN'}","${r.location || ''}","${r.remark || ''}"\r\n`;
+                });
+            } else if (type === 'dispatch') {
+                if(dispatchRecords.length === 0) return showToast("出货明细为空，无可导出数据", "error");
+                csv += "\"No.\",\"Date\",\"Customer\",\"D.O Number\",\"Brand\",\"Rating\",\"Model\",\"Product Code\",\"OLD NO\",\"Qty\",\"Unit\",\"Remark\"\r\n";
+                dispatchRecords.forEach((r, i) => {
+                    csv += `"${i+1}","${r.date || ''}","${r.customer || ''}","${r.docNo || ''}","${r.brand}","${r.rating}","${r.model}","${r.productCode}","${r.oldNo || ''}","${r.qty}","${r.unit || 'CTN'}","${r.remark || ''}"\r\n`;
+                });
+            }
+            generatedCSVData = csv;
+            document.getElementById('csv-preview-area').innerText = csv.replace("\ufeff", "");
+            document.getElementById('export-modal').classList.remove('hidden');
             lucide.createIcons();
         }
 
-        // --- 字典维护 ---
-        function selectDBForScan(bc) { switchTab('scan'); lookupBarcode(bc); }
+        function exportBalanceCSV() {
+            renderBalance();
+            let csv = "\ufeff\"Product Code\",\"Brand\",\"Rating\",\"Model\",\"Unit\",\"Total Inbound\",\"Total Outbound\",\"Net Stock\"\r\n";
+            let inv = {};
+            records.forEach(r => {
+                const key = `${r.productCode || r.barcode}_${r.unit || 'CTN'}`;
+                if(!inv[key]) inv[key] = { code: r.productCode, brand: r.brand, rating: r.rating, model: r.model, unit: r.unit || 'CTN', in: 0, out: 0 };
+                inv[key].in += r.qty;
+            });
+            dispatchRecords.forEach(r => {
+                const key = `${r.productCode || r.barcode}_${r.unit || 'CTN'}`;
+                if(!inv[key]) inv[key] = { code: r.productCode, brand: r.brand, rating: r.rating, model: r.model, unit: r.unit || 'CTN', in: 0, out: 0 };
+                inv[key].out += r.qty;
+            });
+            Object.values(inv).forEach(item => {
+                csv += `"${item.code}","${item.brand}","${item.rating}","${item.model}","${item.unit}","${item.in}","${item.out}","${item.in - item.out}"\r\n`;
+            });
+            generatedCSVData = csv;
+            document.getElementById('csv-preview-area').innerText = csv.replace("\ufeff", "");
+            document.getElementById('export-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeExportModal() { document.getElementById('export-modal').classList.add('hidden'); }
+        function triggerActualDownload() {
+            const blob = new Blob([generatedCSVData], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `SOIL_Report_${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            closeExportModal();
+        }
+        function copyCSVToClipboard() {
+            const ta = document.createElement("textarea");
+            ta.value = generatedCSVData.replace("\ufeff", "");
+            ta.style.position = "fixed"; ta.style.opacity = "0";
+            document.body.appendChild(ta);
+            ta.focus(); ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            closeExportModal();
+            showToast("📋 CSV 表格文本已复制到剪贴板！");
+        }
+
+        // --- LOCATION & DB MANAGEMENT ---
+        function updateUILocations() {
+            document.getElementById('input-location').innerHTML = locationsDB.map(loc => `<option value="${loc}" ${loc === lastSelectedLocation ? 'selected' : ''}>${loc}</option>`).join('');
+            document.getElementById('location-list-container').innerHTML = locationsDB.map(loc => `<div class="flex items-center justify-between bg-slate-50 p-2 rounded-lg text-xs"><span class="font-bold flex-1 ${loc === lastSelectedLocation ? 'text-blue-600' : 'text-slate-700'}">${loc}</span><div class="flex gap-1">${loc !== lastSelectedLocation ? `<button onclick="setAsDefaultLocation('${loc}')" class="text-[9px] border bg-white px-1.5 rounded">设默认</button>` : ''}<button onclick="deleteLocation('${loc}')" class="text-slate-400 hover:text-rose-500"><i data-lucide="trash" class="w-3.5 h-3.5"></i></button></div></div>`).join('');
+            lucide.createIcons();
+        }
+        function openLocationManager() { document.getElementById('location-modal').classList.remove('hidden'); lucide.createIcons(); }
+        function closeLocationManager() { document.getElementById('location-modal').classList.add('hidden'); }
+        function addNewLocation() { const val = document.getElementById('new-location-input').value.trim(); if(!val || locationsDB.includes(val)) return; locationsDB.push(val); setAsDefaultLocation(val); document.getElementById('new-location-input').value = ""; showToast("地点添加成功"); }
+        function setAsDefaultLocation(loc) { lastSelectedLocation = loc; localStorage.setItem('soil_lastloc_v2', loc); updateUILocations(); }
+        function saveLastLocation(val) { lastSelectedLocation = val; localStorage.setItem('soil_lastloc_v2', val); }
+        function deleteLocation(loc) { if(locationsDB.length <= 1) return; showConfirm("删除地点？", `确定移除 ${loc} 吗？`, () => { locationsDB = locationsDB.filter(l => l !== loc); if(lastSelectedLocation === loc) setAsDefaultLocation(locationsDB[0]); localStorage.setItem('soil_loc_v2', JSON.stringify(locationsDB)); updateUILocations(); }); }
+
+        function addNewProduct() {
+            const bc = document.getElementById('new-barcode').value.trim();
+            const br = document.getElementById('new-brand').value.trim();
+            const rt = document.getElementById('new-rating').value.trim();
+            const md = document.getElementById('new-model').value.trim();
+            const oldNo = document.getElementById('new-old-no').value.trim();
+            if(!bc || !br || !rt || !md) { showToast("请完整填写标有星号的信息", "error"); return; }
+            productDB[bc] = { brand: br, rating: rt, model: md, type: document.getElementById('new-type').value, productCode: document.getElementById('new-product-code').value.trim(), oldNo: oldNo, batchNumber: bc };
+            localStorage.setItem('soil_db_v5', JSON.stringify(productDB));
+            updateUIDB();
+            initOrderProductDropdown();
+            clearDBForm();
+            showToast("✅ 字典条目已保存");
+        }
+        function clearDBForm() { 
+            document.getElementById('new-barcode').value = ""; 
+            document.getElementById('new-brand').value = "S-OIL"; 
+            document.getElementById('new-rating').value = ""; 
+            document.getElementById('new-product-code').value = ""; 
+            document.getElementById('new-old-no').value = ""; 
+            document.getElementById('new-model').value = ""; 
+        }
+        function editDBProduct(bc) {
+            const p = productDB[bc]; if(!p) return;
+            document.getElementById('new-barcode').value = bc; 
+            document.getElementById('new-brand').value = p.brand; 
+            document.getElementById('new-rating').value = p.rating;
+            document.getElementById('new-product-code').value = p.productCode || ""; 
+            document.getElementById('new-old-no').value = p.oldNo || ""; 
+            document.getElementById('new-model').value = p.model; 
+            document.getElementById('new-type').value = p.type;
+            window.scrollTo({ top: 0, behavior: 'smooth' }); 
+            showToast("✍️ 已载入产品修改模式");
+        }
+        function deleteDBProduct(bc) { showConfirm("删除确认", `确定从条码字典删除此项？`, () => { delete productDB[bc]; localStorage.setItem('soil_db_v5', JSON.stringify(productDB)); updateUIDB(); initOrderProductDropdown(); showToast("已成功删除"); }); }
         
+        function selectDBForScan(bc) {
+            switchTab('scan');
+            lookupBarcode(bc);
+        }
+
         function updateUIDB() {
-            const keys = Object.keys(productDB); document.getElementById('db-count').innerText = keys.length;
+            const keys = Object.keys(productDB);
+            document.getElementById('db-count').innerText = keys.length;
             
             document.getElementById('db-list').innerHTML = keys.map(k => {
                 const p = productDB[k];
@@ -694,7 +1879,10 @@
                     <div class="space-y-1.5 flex-1 pr-3">
                         <div class="text-[13px] font-black text-slate-800">${p.brand} ${p.rating}</div>
                         <div class="text-[10px] text-slate-500 font-medium">${p.model}</div>
-                        <div class="text-[11px] font-bold text-blue-600 pt-1">Code: ${p.productCode || '-'}</div>
+                        <div class="flex gap-2 text-[11px] font-bold pt-1">
+                            <span class="text-indigo-600">Code: ${p.productCode || '-'}</span>
+                            ${p.oldNo ? `<span class="text-amber-700 bg-amber-50 px-1 rounded">OLD: ${p.oldNo}</span>` : ''}
+                        </div>
                         <div class="text-[11px] font-bold text-emerald-600">Batch: ${p.batchNumber || k}</div>
                     </div>
                     <div class="flex flex-col gap-2 w-16 shrink-0">
@@ -710,91 +1898,31 @@
             lucide.createIcons();
         }
 
-        function addNewProduct() {
-            const bc = document.getElementById('new-barcode').value.trim(); const br = document.getElementById('new-brand').value.trim(); const rt = document.getElementById('new-rating').value.trim(); const md = document.getElementById('new-model').value.trim(); const ty = document.getElementById('new-type').value; const pc = document.getElementById('new-product-code').value.trim();
-            if(!bc || !br || !rt || !md) { showToast("❌ 请填写完整带星号的信息！", "error"); return; }
-            productDB[bc] = { brand: br, rating: rt, model: md, type: ty, productCode: pc, batchNumber: bc };
-            localStorage.setItem('sirim_product_db_v2', JSON.stringify(productDB)); updateUIDB(); clearDBForm(); showToast("✅ 成功更新本地字典！");
-        }
-        function clearDBForm() { document.getElementById('new-barcode').value = ""; document.getElementById('new-brand').value = "S-OIL"; document.getElementById('new-rating').value = ""; document.getElementById('new-product-code').value = ""; document.getElementById('new-model').value = ""; document.getElementById('new-type').value = "SYNTHETIC"; }
-        function editDBProduct(bc) { const p = productDB[bc]; if(!p) return; document.getElementById('new-barcode').value = bc; document.getElementById('new-brand').value = p.brand; document.getElementById('new-rating').value = p.rating; document.getElementById('new-product-code').value = p.productCode || ""; document.getElementById('new-model').value = p.model; document.getElementById('new-type').value = p.type; window.scrollTo({ top: 0, behavior: 'smooth' }); showToast("✍️ 进入编辑模式，修改后请点击下方保存！"); }
-        function resetDefaultDB() { showConfirm("恢复系统默认字典？", "这会覆盖掉您现有的部分条码！", function() { productDB = { ...defaultProducts }; localStorage.setItem('sirim_product_db_v2', JSON.stringify(productDB)); updateUIDB(); if(!document.getElementById('sync-modal').classList.contains('hidden')) { closeSyncModal(); } showToast("✅ 已恢复内置 S-OIL 库"); }); }
-        function deleteDBProduct(bc) { showConfirm("删除字典项？", `确定要永久删除该型号吗？`, function() { delete productDB[bc]; localStorage.setItem('sirim_product_db_v2', JSON.stringify(productDB)); updateUIDB(); showToast("✅ 已成功删除该型号"); }); }
-
-        // --- 同步管理逻辑 ---
-        function openSyncModal() { document.getElementById('sync-code-area').value = ""; document.getElementById('sync-modal').classList.remove('hidden'); lucide.createIcons(); }
+        // --- DICTIONARY SYNC ENGINE ---
+        function openSyncModal() { document.getElementById('sync-code-area').value = ""; document.getElementById('sync-modal').classList.remove('hidden'); }
         function closeSyncModal() { document.getElementById('sync-modal').classList.add('hidden'); }
-        function exportDBFile() { const dataStr = JSON.stringify(productDB, null, 2); const blob = new Blob([dataStr], { type: "application/json" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = `SOIL_DB_Backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(link); link.click(); document.body.removeChild(link); showToast("✅ 字典备份文件已导出！"); }
+        function exportDBFile() { const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([JSON.stringify(productDB)], { type: "application/json" })); link.download = "DB_Backup.json"; link.click(); }
         function triggerImportDB() { document.getElementById('import-db-file').click(); }
-        function importDBFromFile(e) { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = function(evt) { try { const imported = JSON.parse(evt.target.result); mergeDB(imported); } catch(err) { showToast("❌ 文件格式错误，导入失败！", "error"); } }; reader.readAsText(file); e.target.value = ""; }
-        function exportDBCSV() { const keys = Object.keys(productDB); if(keys.length === 0) return; let csv = "\ufeff\"Barcode\",\"Brand\",\"Rating\",\"Model\",\"Product Code\",\"Type\"\r\n"; keys.forEach(k => { const p = productDB[k]; csv += `"${k}","${p.brand}","${p.rating}","${p.model}","${p.productCode || ''}","${p.type}"\r\n`; }); const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = `SOIL_Dictionary_${new Date().toISOString().slice(0,10)}.csv`; document.body.appendChild(link); link.click(); document.body.removeChild(link); showToast("✅ 字典 CSV 表格已导出！"); }
-        function copyDBCode() { const dataStr = JSON.stringify(productDB); const ta = document.getElementById('sync-code-area'); ta.value = dataStr; ta.select(); document.execCommand('copy'); showToast("📋 字典代码已复制！通过微信发给同事即可"); }
-        function importDBFromCode() { const val = document.getElementById('sync-code-area').value.trim(); if(!val) { showToast("⚠️ 请先粘贴代码！", "error"); return; } try { const imported = JSON.parse(val); mergeDB(imported); document.getElementById('sync-code-area').value = ""; } catch(err) { showToast("❌ 代码格式无效，请检查！", "error"); } }
-        function mergeDB(importedData) { if(typeof importedData !== 'object' || importedData === null) throw new Error(); let count = 0; for(const key in importedData) { if(importedData.hasOwnProperty(key)) { productDB[key] = importedData[key]; count++; } } localStorage.setItem('sirim_product_db_v2', JSON.stringify(productDB)); updateUIDB(); closeSyncModal(); showToast(`✅ 成功导入并合并 ${count} 个条码！`); }
+        function importDBFromFile(e) { const reader = new FileReader(); reader.onload = (evt) => { try { mergeDB(JSON.parse(evt.target.result)); }catch(e){} }; if(e.target.files[0]) reader.readAsText(e.target.files[0]); e.target.value = ""; }
+        function exportDBCSV() { let csv = "\ufeff\"Barcode\",\"Brand\",\"Rating\",\"Model\",\"Product Code\",\"OLD NO\",\"Type\"\r\n"; Object.keys(productDB).forEach(k => { const p = productDB[k]; csv += `"${k}","${p.brand}","${p.rating}","${p.model}","${p.productCode || ''}","${p.oldNo || ''}","${p.type}"\r\n`; }); const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" })); link.download = "DB_Export.csv"; link.click(); }
+        function copyDBCode() { const ta = document.getElementById('sync-code-area'); ta.value = JSON.stringify(productDB); ta.select(); document.execCommand('copy'); showToast("代码已复制到剪贴板"); }
+        function importDBFromCode() { try { mergeDB(JSON.parse(document.getElementById('sync-code-area').value.trim())); document.getElementById('sync-code-area').value = ""; } catch(e) { showToast("代码格式无效", "error"); } }
+        function mergeDB(data) { for(const k in data) productDB[k] = data[k]; localStorage.setItem('soil_db_v5', JSON.stringify(productDB)); updateUIDB(); initOrderProductDropdown(); closeSyncModal(); showToast("✅ 字典合并成功！"); }
+        function resetDefaultDB() { showConfirm("恢复确认", "确定要恢复到出厂默认字典库吗？", () => { productDB = { ...productDB, ...defaultProducts }; localStorage.setItem('soil_db_v5', JSON.stringify(productDB)); updateUIDB(); initOrderProductDropdown(); closeSyncModal(); showToast("已恢复默认"); }); }
 
-        // --- 报表导出逻辑 ---
-        function exportToCSV(type) {
-            currentExportType = type;
-            let csv = "\ufeff";
-            
-            if(type === 'inventory') {
-                if(records.length === 0) return;
-                document.getElementById('export-modal-title').innerText = "入库 SIRIM 导出助手";
-                csv += "\"ATTACHMENT 1\"\r\n\"(For Letter of Undertaking)\"\r\n\"Information on Existing Stocks of Engine Oil for Motor Vehicle\"\r\n\r\n\"No.\",\"Brand\",\"Model\",\"Existing Stock Details - Type\",\"Rating\",\"Product Code\",\"Stock Batch Number\",\"Stock Quantity\",\"Stock Location\",\"Remark\"\r\n";
-                let tot = 0;
-                records.forEach((r, i) => { 
-                    tot += r.qty; const u = r.unit || 'CTN'; csv += `"${i+1}","${r.brand}","${r.model}","${r.type}","${r.rating}","${r.productCode}","${r.batchNumber}","${r.qty} ${u}","${r.location}","${r.remark}"\r\n`; 
-                });
-                csv += `,,,,,"Total","Stock Quantity:",,"${tot}",,\r\n,,,,,,"Quantity of Labels Requested:",,"${tot}",,\r\n`;
-            } else if (type === 'dispatch') {
-                if(dispatchRecords.length === 0) return;
-                document.getElementById('export-modal-title').innerText = "出货记录导出助手";
-                csv += "\"Dispatch Date\",\"Customer / Receiver\",\"D.O / Invoice No.\",\"Brand\",\"Rating\",\"Model\",\"Product Code\",\"Barcode\",\"Out Quantity\",\"Unit\",\"Remark\"\r\n";
-                dispatchRecords.forEach(r => {
-                    csv += `"${r.date}","${r.customer}","${r.docNo}","${r.brand}","${r.rating}","${r.model}","${r.productCode}","${r.barcode}","${r.qty}","${r.unit}","${r.remark}"\r\n`;
-                });
-            } else if (type === 'stock') {
-                document.getElementById('export-modal-title').innerText = "实时库存报表导出";
-                csv += "\"Product Code\",\"Brand\",\"Rating\",\"Model\",\"Inbound (入库)\",\"Outbound (出货)\",\"Net Balance (当前结余)\",\"Unit\"\r\n";
-                
-                let balances = {};
-                records.forEach(r => {
-                    let key = r.productCode + '_' + (r.unit || 'CTN');
-                    if(!balances[key]) balances[key] = { model: r.model, code: r.productCode, rating: r.rating, brand: r.brand, unit: r.unit || 'CTN', in: 0, out: 0, net: 0 };
-                    balances[key].in += r.qty; balances[key].net += r.qty;
-                });
-                dispatchRecords.forEach(r => {
-                    let key = r.productCode + '_' + (r.unit || 'CTN');
-                    if(!balances[key]) balances[key] = { model: r.model, code: r.productCode, rating: r.rating, brand: r.brand, unit: r.unit || 'CTN', in: 0, out: 0, net: 0 };
-                    balances[key].out += r.qty; balances[key].net -= r.qty;
-                });
-                
-                Object.keys(balances).forEach(k => {
-                    const b = balances[k];
-                    csv += `"${b.code}","${b.brand}","${b.rating}","${b.model}","${b.in}","${b.out}","${b.net}","${b.unit}"\r\n`;
-                });
-            }
-            
-            generatedCSVData = csv; 
-            document.getElementById('csv-preview-area').innerText = csv.replace("\ufeff", "");
-            document.getElementById('export-modal').classList.remove('hidden'); 
-            lucide.createIcons();
+        // --- SAFE CONFIRM MODAL ---
+        function showConfirm(title, message, callback) {
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-message').innerText = message;
+            confirmCallback = callback;
+            document.getElementById('confirm-modal').classList.remove('hidden');
         }
-        
-        function closeExportModal() { document.getElementById('export-modal').classList.add('hidden'); }
-        function triggerActualDownload() {
-            const blob = new Blob([generatedCSVData], { type: "text/csv;charset=utf-8;" }); const url = URL.createObjectURL(blob); const link = document.createElement("a");
-            
-            let prefix = "Export";
-            if(currentExportType === 'inventory') prefix = "SIRIM_Inbound";
-            else if(currentExportType === 'dispatch') prefix = "Outbound_Log";
-            else if(currentExportType === 'stock') prefix = "Live_Stock_Balance";
-            
-            link.href = url; link.download = `${prefix}_${new Date().toISOString().slice(0,10)}.csv`; document.body.appendChild(link); link.click(); document.body.removeChild(link); closeExportModal();
-        }
-        function copyCSVToClipboard() {
-            const ta = document.createElement("textarea"); ta.value = generatedCSVData.replace("\ufeff", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
-            document.body.appendChild(ta); ta.focus(); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); closeExportModal(); showToast("📋 数据已复制，去微信/Excel粘贴吧！");
+        function setupConfirmHandlers() {
+            document.getElementById('confirm-cancel').onclick = function() { document.getElementById('confirm-modal').classList.add('hidden'); };
+            document.getElementById('confirm-ok').onclick = function() { 
+                document.getElementById('confirm-modal').classList.add('hidden');
+                if (confirmCallback) { setTimeout(confirmCallback, 50); }
+            };
         }
     </script>
 </body>
