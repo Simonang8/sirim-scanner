@@ -92,7 +92,6 @@
                 </div>
 
                 <div class="bg-white p-4 rounded-3xl border border-indigo-100 shadow-sm space-y-3">
-                    
                     <!-- Customer Selection & Sync Button -->
                     <div>
                         <div class="flex justify-between items-center mb-1">
@@ -106,7 +105,7 @@
                         </select>
                     </div>
 
-                    <!-- Product Selection -->
+                    <!-- Product Selection with Interactive Typing Search & Auto-Suggestions Dropdown -->
                     <div class="border-t border-slate-100 pt-3">
                         <div class="flex justify-between items-center mb-1.5">
                             <label class="block text-[11px] font-bold text-indigo-700">1. 选择产品 (检索/扫码)</label>
@@ -115,9 +114,20 @@
                             </button>
                         </div>
                         
+                        <!-- Interactive Search Input Field -->
+                        <div class="mb-2 relative text-left">
+                            <div class="relative">
+                                <i data-lucide="search" class="w-3.5 h-3.5 text-indigo-400 absolute left-3 top-3"></i>
+                                <input type="text" id="manual-barcode-order" oninput="handleSearchSuggestions(this.value, 'order')" placeholder="输入 CODE / OLD NO / 粘度 / 型号 / 条码 检索..." class="w-full pl-8 pr-3 py-2 bg-indigo-50/70 border border-indigo-200 rounded-xl text-xs font-bold text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-indigo-400/80">
+                            </div>
+                            <!-- Suggestions Dropdown Box for Order Hub -->
+                            <div id="suggestions-order" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 max-h-52 overflow-y-auto no-scrollbar hidden"></div>
+                        </div>
+
+                        <!-- Dropdown Select Backup -->
                         <div class="mb-2">
-                            <select id="order-product-select" onchange="lookupProductForOrder(this.value)" class="w-full px-3 py-2 bg-indigo-50/70 border border-indigo-200 rounded-xl text-xs font-bold text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                <option value="">-- 点击选择产品型号或代码 --</option>
+                            <select id="order-product-select" onchange="lookupProductForOrder(this.value); if(this.value && productDB[this.value]){ document.getElementById('manual-barcode-order').value = productDB[this.value].productCode || this.value; }" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="">-- 或在下拉菜单中点击选择产品 --</option>
                             </select>
                         </div>
 
@@ -211,7 +221,7 @@
             <div id="tab-scan" class="space-y-4 hidden">
                 <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center">
                     <span class="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full mb-2">盘点入库专用</span>
-                    <h3 class="font-bold text-slate-800 text-xs mb-3">扫描条形码载入产品</h3>
+                    <h3 class="font-bold text-slate-800 text-xs mb-3">扫描或检索条形码/代码</h3>
                     <div class="flex gap-3 w-full justify-center">
                         <button onclick="startScanning()" class="w-20 h-20 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-2xl flex flex-col items-center justify-center shadow-md active:scale-95 transition-all"><i data-lucide="scan" class="w-6 h-6 mb-1"></i><span class="text-[10px] font-bold">相机扫码</span></button>
                         <button onclick="triggerFileScan()" class="w-20 h-20 bg-slate-50 border border-slate-200 text-slate-600 rounded-2xl flex flex-col items-center justify-center active:scale-95 transition-all relative">
@@ -220,9 +230,15 @@
                         </button>
                         <input type="file" id="file-scanner" accept="image/*" class="hidden" onchange="scanFromFile(event)">
                     </div>
-                    <div class="w-full mt-4 flex gap-2">
-                        <input type="text" id="manual-barcode" placeholder="手动输入条码号..." class="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <button onclick="lookupBarcode()" class="bg-slate-800 text-white px-3 py-2 rounded-xl text-xs font-bold active:scale-95">检索</button>
+
+                    <!-- Enhanced Input Search with Auto Suggestions Dropdown -->
+                    <div class="w-full mt-4 relative text-left">
+                        <div class="flex gap-2">
+                            <input type="text" id="manual-barcode" oninput="handleSearchSuggestions(this.value, 'receive')" placeholder="输入代码 / OLD NO / 条码..." class="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button onclick="lookupBarcode()" class="bg-slate-800 text-white px-3 py-2 rounded-xl text-xs font-bold active:scale-95">检索</button>
+                        </div>
+                        <!-- Suggestions Container -->
+                        <div id="suggestions-receive" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 max-h-48 overflow-y-auto no-scrollbar hidden"></div>
                     </div>
                 </div>
 
@@ -285,13 +301,19 @@
             <div id="tab-dispatch" class="space-y-4 hidden">
                 <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center">
                     <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full mb-2">出货扣减库存专用</span>
-                    <h3 class="font-bold text-slate-800 text-xs mb-3">扫描出货物资</h3>
+                    <h3 class="font-bold text-slate-800 text-xs mb-3">扫描或检索出货物资</h3>
                     <div class="flex gap-3 w-full justify-center">
                         <button onclick="startScanningDispatch()" class="w-20 h-20 bg-amber-500 text-white rounded-2xl flex flex-col items-center justify-center shadow-md active:scale-95 transition-all"><i data-lucide="scan" class="w-6 h-6 mb-1"></i><span class="text-[10px] font-bold">扫码出库</span></button>
                     </div>
-                    <div class="w-full mt-4 flex gap-2">
-                        <input type="text" id="manual-barcode-dispatch" placeholder="手动输入出货条码..." class="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none">
-                        <button onclick="lookupBarcodeDispatch()" class="bg-amber-600 text-white px-3 py-2 rounded-xl text-xs font-bold active:scale-95">检索</button>
+                    
+                    <!-- Enhanced Dispatch Input Search with Auto Suggestions -->
+                    <div class="w-full mt-4 relative text-left">
+                        <div class="flex gap-2">
+                            <input type="text" id="manual-barcode-dispatch" oninput="handleSearchSuggestions(this.value, 'dispatch')" placeholder="手动输入出货代码 / OLD NO / 条码..." class="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <button onclick="lookupBarcodeDispatch()" class="bg-amber-600 text-white px-3 py-2 rounded-xl text-xs font-bold active:scale-95">检索</button>
+                        </div>
+                        <!-- Suggestions Container for Dispatch -->
+                        <div id="suggestions-dispatch" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 max-h-48 overflow-y-auto no-scrollbar hidden"></div>
                     </div>
                 </div>
 
@@ -409,6 +431,7 @@
         </main>
     </div>
 
+    <!-- Modals -->
     <!-- Modal 1: Scanner Modal -->
     <div id="scanner-modal" class="fixed inset-0 bg-slate-950/95 z-50 flex flex-col justify-between hidden">
         <div class="p-5 flex justify-between items-center text-white"><div><h3 class="font-bold text-base" id="scan-title">扫码</h3></div><button onclick="stopScanning()" class="bg-white/10 p-2.5 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button></div>
@@ -466,7 +489,7 @@
         </div>
     </div>
 
-    <!-- Modal 5: Price & Discount Settings (WITH OLD NO & ADD PRODUCT FEATURE) -->
+    <!-- Modal 5: Price & Discount Settings -->
     <div id="pricing-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center px-4 hidden">
         <div class="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center pb-2 border-b mb-2">
@@ -480,7 +503,7 @@
             </div>
             <p class="text-[10px] text-slate-500 mb-2">在此设置每款机油的默认单价 (Unit Price)、OLD NO (旧编号)、官方折扣 (Discount) 和积分 (Points)。开单时将自动带入。</p>
             
-            <!-- ADD NEW PRODUCT PRICE DIRECTLY IN THIS MODAL -->
+            <!-- ADD NEW PRODUCT PRICE FORM -->
             <div class="bg-emerald-50/70 border border-emerald-200 p-3 rounded-2xl mb-3 space-y-2">
                 <div class="flex justify-between items-center">
                     <span class="text-[11px] font-black text-emerald-900 flex items-center gap-1"><i data-lucide="plus-circle" class="w-3.5 h-3.5 text-emerald-600"></i> ➕ 手动新增产品价格条目</span>
@@ -726,6 +749,22 @@
             updateUILocations();
             renderBalance();
             setupConfirmHandlers();
+
+            // Global Document Click Handler to hide search suggestions dropdowns when tapping outside
+            document.addEventListener('click', function(e) {
+                if(!e.target.closest('#manual-barcode') && !e.target.closest('#suggestions-receive')) {
+                    const el = document.getElementById('suggestions-receive');
+                    if(el) el.classList.add('hidden');
+                }
+                if(!e.target.closest('#manual-barcode-dispatch') && !e.target.closest('#suggestions-dispatch')) {
+                    const el = document.getElementById('suggestions-dispatch');
+                    if(el) el.classList.add('hidden');
+                }
+                if(!e.target.closest('#manual-barcode-order') && !e.target.closest('#suggestions-order')) {
+                    const el = document.getElementById('suggestions-order');
+                    if(el) el.classList.add('hidden');
+                }
+            });
         };
 
         // --- APP TITLE CUSTOMIZATION ---
@@ -743,6 +782,77 @@
                 showToast("✅ 系统标题改写成功");
             }
             closeAppNameModal();
+        }
+
+        // ================== AUTO-SUGGESTION SEARCH DROPDOWN LOGIC ==================
+        function handleSearchSuggestions(val, mode) {
+            let containerId = 'suggestions-receive';
+            if(mode === 'dispatch') containerId = 'suggestions-dispatch';
+            else if(mode === 'order') containerId = 'suggestions-order';
+
+            const container = document.getElementById(containerId);
+            const query = val.trim().toLowerCase();
+
+            if(!query || query.length < 1) {
+                container.classList.add('hidden');
+                container.innerHTML = '';
+                return;
+            }
+
+            const matches = [];
+            for (const key in productDB) {
+                const p = productDB[key];
+                const code = (p.productCode || '').toLowerCase();
+                const oldNo = (p.oldNo || '').toLowerCase();
+                const barcode = (key || '').toLowerCase();
+                const model = (p.model || '').toLowerCase();
+                const rating = (p.rating || '').toLowerCase();
+
+                if (code.includes(query) || oldNo.includes(query) || barcode.includes(query) || model.includes(query) || rating.includes(query)) {
+                    matches.push({ key, ...p });
+                }
+            }
+
+            if (matches.length === 0) {
+                container.innerHTML = '<div class="p-2.5 text-center text-slate-400 text-xs font-semibold">未找到匹配的产品号</div>';
+                container.classList.remove('hidden');
+                return;
+            }
+
+            container.innerHTML = matches.slice(0, 8).map(m => `
+                <div onclick="selectSearchSuggestion('${m.key}', '${mode}')" class="px-3 py-2.5 hover:bg-indigo-50 border-b border-slate-100 last:border-b-0 cursor-pointer text-xs flex justify-between items-center transition-colors">
+                    <div class="pr-2 truncate">
+                        <div class="font-black text-slate-800">${m.brand} ${m.rating} <span class="text-[10px] text-indigo-600 font-bold">(${m.productCode || m.key})</span></div>
+                        <div class="text-[10px] text-slate-500 truncate">${m.model}</div>
+                    </div>
+                    ${m.oldNo ? `<span class="text-[9px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded shrink-0">OLD: ${m.oldNo}</span>` : ''}
+                </div>
+            `).join('');
+
+            container.classList.remove('hidden');
+        }
+
+        function selectSearchSuggestion(key, mode) {
+            let containerId = 'suggestions-receive';
+            if(mode === 'dispatch') containerId = 'suggestions-dispatch';
+            else if(mode === 'order') containerId = 'suggestions-order';
+
+            const container = document.getElementById(containerId);
+            if(container) container.classList.add('hidden');
+
+            if(mode === 'receive') {
+                lookupBarcode(key);
+            } else if(mode === 'dispatch') {
+                lookupBarcodeDispatch(key);
+            } else if(mode === 'order') {
+                lookupProductForOrder(key);
+                const orderInput = document.getElementById('manual-barcode-order');
+                if(orderInput && productDB[key]) {
+                    orderInput.value = `${productDB[key].productCode || key} - ${productDB[key].brand} ${productDB[key].rating}`;
+                }
+                const selectEl = document.getElementById('order-product-select');
+                if(selectEl) selectEl.value = key;
+            }
         }
 
         // ================== ORDER HUB LOGIC ==================
@@ -766,7 +876,7 @@
             if(!code) return;
             let p = productDB[code];
             if(!p) {
-                const key = Object.keys(productDB).find(k => productDB[k].productCode === code);
+                const key = Object.keys(productDB).find(k => productDB[k].productCode === code || productDB[k].oldNo === code);
                 if(key) p = productDB[key];
             }
 
@@ -828,6 +938,7 @@
             renderOrderCart();
 
             // Reset selection fields for next item
+            document.getElementById('manual-barcode-order').value = "";
             document.getElementById('order-product-select').value = "";
             document.getElementById('order-code').value = "";
             document.getElementById('order-old-no').value = "";
@@ -841,7 +952,7 @@
             document.getElementById('order-total-points').value = "";
             activeProduct = null;
 
-            showToast("✅ 已追加进当前订单明细");
+            showToast("✅ 已加入当前订单明细");
         }
 
         function removeCartItem(id) {
@@ -1085,7 +1196,6 @@
             document.getElementById('import-pricing-csv-file').click();
         }
 
-        // Robust CSV Parser helper that handles quotes and commas
         function parseCSVLine(line) {
             const result = [];
             let current = '';
@@ -1155,7 +1265,6 @@
                         else if(prodCode) targetKey = Object.keys(productDB).find(k => productDB[k].productCode === prodCode);
                         else if(key) targetKey = Object.keys(productDB).find(k => productDB[k].productCode === key);
 
-                        // If item exists, update it. If not, auto-create it!
                         if(!targetKey) {
                             targetKey = prodCode || key;
                             if(targetKey) {
@@ -1523,7 +1632,17 @@
         // --- LOOKUP FUNCTIONS ---
         function lookupBarcode(input = null) {
             const code = input || document.getElementById('manual-barcode').value.trim(); if(!code) return;
-            document.getElementById('manual-barcode').value = code; const p = productDB[code];
+            document.getElementById('manual-barcode').value = code;
+            
+            // Search in DB by barcode, productCode, or oldNo
+            let p = productDB[code];
+            if(!p) {
+                const foundKey = Object.keys(productDB).find(k => 
+                    productDB[k].productCode === code || productDB[k].oldNo === code
+                );
+                if(foundKey) p = productDB[foundKey];
+            }
+
             if(p) {
                 document.getElementById('preview-brand').innerText = p.brand;
                 document.getElementById('preview-rating').innerText = p.rating;
@@ -1539,13 +1658,22 @@
                 showToast("✅ 匹配成功！");
             } else {
                 _resetPreview('receive');
-                showToast("❌ 未找到该条码", "error");
+                showToast("❌ 未找到该条码或代码", "error");
             }
         }
         
         function lookupBarcodeDispatch(input = null) {
             const code = input || document.getElementById('manual-barcode-dispatch').value.trim(); if(!code) return;
-            document.getElementById('manual-barcode-dispatch').value = code; const p = productDB[code];
+            document.getElementById('manual-barcode-dispatch').value = code;
+            
+            let p = productDB[code];
+            if(!p) {
+                const foundKey = Object.keys(productDB).find(k => 
+                    productDB[k].productCode === code || productDB[k].oldNo === code
+                );
+                if(foundKey) p = productDB[foundKey];
+            }
+
             if(p) {
                 document.getElementById('preview-brand-dispatch').innerText = `${p.brand} ${p.rating}`;
                 document.getElementById('preview-model-dispatch').innerText = p.model;
@@ -1555,7 +1683,7 @@
                 showToast("✅ 可以出货");
             } else {
                 _resetPreview('dispatch');
-                showToast("❌ 未找到该条码", "error");
+                showToast("❌ 未找到该条码或代码", "error");
             }
         }
 
