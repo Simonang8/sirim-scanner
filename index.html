@@ -100,9 +100,15 @@
                                 <i data-lucide="users" class="w-3 h-3 text-indigo-500"></i> 管理与备份同步
                             </button>
                         </div>
-                        <select id="order-customer" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <!-- Populated dynamically -->
-                        </select>
+                        <!-- Interactive Customer Search Input -->
+                        <div class="relative text-left">
+                            <div class="relative">
+                                <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3"></i>
+                                <input type="text" id="order-customer" oninput="handleCustomerSearchSuggestions(this.value)" onclick="handleCustomerSearchSuggestions(this.value)" placeholder="-- 输入检索或点击选择客户名字 --" class="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-slate-400">
+                            </div>
+                            <!-- Suggestions Dropdown Box for Customers -->
+                            <div id="suggestions-customer-order" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 max-h-52 overflow-y-auto no-scrollbar hidden"></div>
+                        </div>
                     </div>
 
                     <!-- Product Selection with Interactive Typing Search & Auto-Suggestions Dropdown -->
@@ -764,6 +770,10 @@
                     const el = document.getElementById('suggestions-order');
                     if(el) el.classList.add('hidden');
                 }
+                if(!e.target.closest('#order-customer') && !e.target.closest('#suggestions-customer-order')) {
+                    const el = document.getElementById('suggestions-customer-order');
+                    if(el) el.classList.add('hidden');
+                }
             });
         };
 
@@ -855,12 +865,40 @@
             }
         }
 
+        // ================== CUSTOMER SEARCH SUGGESTION LOGIC ==================
+        function handleCustomerSearchSuggestions(val) {
+            const container = document.getElementById('suggestions-customer-order');
+            const query = (val || '').trim().toLowerCase();
+
+            let matches = customerDatabase.slice().sort();
+            if(query.length > 0) {
+                matches = matches.filter(c => c.toLowerCase().includes(query));
+            }
+
+            if (matches.length === 0) {
+                container.innerHTML = '<div class="p-2.5 text-center text-slate-400 text-[10px] font-semibold">未找到匹配客户，提交将作为新客户记录</div>';
+                container.classList.remove('hidden');
+                return;
+            }
+
+            container.innerHTML = matches.map(c => `
+                <div onclick="selectCustomerSuggestion('${c.replace(/'/g, "\\'")}')" class="px-3 py-2.5 hover:bg-indigo-50 border-b border-slate-100 last:border-b-0 cursor-pointer text-xs font-bold text-slate-700 flex items-center gap-2 transition-colors">
+                    <i data-lucide="user" class="w-3.5 h-3.5 text-indigo-400"></i> ${c}
+                </div>
+            `).join('');
+
+            container.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function selectCustomerSuggestion(name) {
+            document.getElementById('order-customer').value = name;
+            document.getElementById('suggestions-customer-order').classList.add('hidden');
+        }
+
         // ================== ORDER HUB LOGIC ==================
         function initCustomerDropdown() {
-            const selectEl = document.getElementById('order-customer');
-            const currentVal = selectEl.value;
-            selectEl.innerHTML = '<option value="">-- 选择客户名字 (Customer) --</option>' + 
-                customerDatabase.slice().sort().map(c => `<option value="${c}" ${c === currentVal ? 'selected' : ''}>${c}</option>`).join('');
+            // Customer selection is now handled by the interactive input field 'order-customer'
         }
 
         function initOrderProductDropdown() {
